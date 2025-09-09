@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/frontend/.env')
 
 # Get the backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://red-planet-routes.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://perseverance-view.preview.emergentagent.com')
 BASE_API_URL = f"{BACKEND_URL}/api"
 
 class MarsRoverAPITester:
