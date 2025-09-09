@@ -1,0 +1,5 @@
+# Minimal dependencies for Vercel deployment
+fastapi==0.110.1
+httpx==0.25.2
+pydantic>=2.6.4
+python-dotenv>=1.0.1
