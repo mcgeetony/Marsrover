@@ -1443,7 +1443,7 @@ function App() {
         </div>
 
         {/* Right Panel - Camera Systems */}
-        <div className="nasa-right-panel">
+        <div className={`nasa-right-panel ${rightPanelCollapsed ? 'collapsed' : ''}`}>
           <NASACameraGallery cameras={roverData.cameras} />
         </div>
       </div>
