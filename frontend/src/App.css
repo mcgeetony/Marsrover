@@ -559,6 +559,34 @@ body {
   font-weight: 400;
 }
 
+.map-mode-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.mode-btn {
+  background: transparent;
+  border: 1px solid var(--carbon-gray-70);
+  color: var(--carbon-gray-40);
+  padding: 6px 12px;
+  font-family: 'Chakra Petch', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn:hover {
+  border-color: var(--carbon-gray-50);
+  color: var(--carbon-gray-30);
+}
+
+.mode-btn.active {
+  background: var(--carbon-blue-60);
+  border-color: var(--carbon-blue-60);
+  color: var(--carbon-gray-10);
+}
+
 .carbon-mars-map {
   flex: 1;
   position: relative;
