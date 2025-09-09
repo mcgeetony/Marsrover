@@ -1319,7 +1319,7 @@ function App() {
       {/* Main Interface */}
       <div className="nasa-main">
         {/* Left Panel - Enhanced Telemetry */}
-        <div className="nasa-left-panel">
+        <div className={`nasa-left-panel ${leftPanelCollapsed ? 'collapsed' : ''} ${telemetryMode === 'horizontal' ? 'horizontal-mode' : ''}`}>
           <div className="panel-header">
             <h3>TELEMETRY DATA</h3>
             <div className={`live-indicator ${isLiveMode ? 'live' : 'offline'}`}>
