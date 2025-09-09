@@ -1327,6 +1327,34 @@ function App() {
             </div>
           </div>
           
+          {/* Telemetry Grouping Tabs */}
+          <div className="telemetry-tabs">
+            <button 
+              className={`telemetry-tab ${telemetryGroup === 'all' ? 'active' : ''}`}
+              onClick={() => setTelemetryGroup('all')}
+            >
+              ALL
+            </button>
+            <button 
+              className={`telemetry-tab ${telemetryGroup === 'environmental' ? 'active' : ''}`}
+              onClick={() => setTelemetryGroup('environmental')}
+            >
+              ENV
+            </button>
+            <button 
+              className={`telemetry-tab ${telemetryGroup === 'systems' ? 'active' : ''}`}
+              onClick={() => setTelemetryGroup('systems')}
+            >
+              SYS
+            </button>
+            <button 
+              className={`telemetry-tab ${telemetryGroup === 'atmospheric' ? 'active' : ''}`}
+              onClick={() => setTelemetryGroup('atmospheric')}
+            >
+              ATM
+            </button>
+          </div>
+          
           <div className="telemetry-stack">
             <NASATelemetryCard
               title="Temperature"
