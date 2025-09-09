@@ -1177,6 +1177,39 @@ function App() {
     setNotifications(prev => prev.filter((_, i) => i !== index));
   }, []);
   
+  // Map zoom memory functionality
+  const handleSolChange = useCallback((newSol) => {
+    // Save current zoom level for the current SOL
+    if (selectedSol !== null) {
+      setMapZoomMemory(prev => ({
+        ...prev,
+        [selectedSol]: mapZoomLevel
+      }));
+    }
+    
+    // Restore zoom level for the new SOL
+    const savedZoom = mapZoomMemory[newSol];
+    if (savedZoom) {
+      setMapZoomLevel(savedZoom);
+    }
+    
+    // Call the original sol change handler
+    onSolChange(newSol);
+  }, [selectedSol, mapZoomLevel, mapZoomMemory, onSolChange]);
+  
+  // Map zoom controls
+  const handleZoomIn = useCallback(() => {
+    setMapZoomLevel(prev => Math.min(prev * 1.2, 3));
+  }, []);
+  
+  const handleZoomOut = useCallback(() => {
+    setMapZoomLevel(prev => Math.max(prev / 1.2, 0.5));
+  }, []);
+  
+  const handleResetZoom = useCallback(() => {
+    setMapZoomLevel(1);
+  }, []);
+  
   // Generate optimized telemetry data - Move all hooks before conditional returns
   const generateTelemetryData = useCallback((baseValue, variation, sols = 50) => {
     return Array.from({length: sols}, (_, i) => {
