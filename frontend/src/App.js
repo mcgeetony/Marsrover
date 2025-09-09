@@ -5,7 +5,7 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Enhanced Carbon Mars Map with zoom and realistic terrain
+// Enhanced Carbon Mars Map with debug mode and real NASA tiles option
 const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
   const canvasRef = useRef(null);
   const [animationProgress, setAnimationProgress] = useState(1);
@@ -14,6 +14,8 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [debugMode, setDebugMode] = useState(false);
+  const [useNASATiles, setUseNASATiles] = useState(false);
   const animationRef = useRef(null);
   
   useEffect(() => {
