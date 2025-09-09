@@ -214,7 +214,41 @@ backend:
         comment: "Minor: Error handling works but doesn't reject negative sols with 400 status. Instead handles gracefully with 200 status and appropriate error messages in response. High sols (99999) handled properly with error messages. Core functionality works correctly."
 
 frontend:
-  # No frontend testing performed as per instructions
+  - task: "Advanced Timeline CSS Support"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Working on CSS updates to fully support advanced timeline features in App.js. Timeline modes, search/filter controls, analytics panel need complete CSS support."
+
+  - task: "Dust Properties Integration"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to integrate dust properties data into telemetry dashboard as mentioned in pending tasks."
+
+  - task: "Real-time Data Integration"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to implement auto-refresh and push notifications for discoveries as mentioned in pending tasks."
 
 metadata:
   created_by: "testing_agent"
