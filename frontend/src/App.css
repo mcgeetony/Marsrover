@@ -1414,6 +1414,50 @@ body {
   padding-top: 120px;
 }
 
+/* Map Zoom Controls */
+.map-zoom-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #333333;
+  backdrop-filter: blur(10px);
+}
+
+.zoom-btn {
+  background: transparent;
+  border: 1px solid #333333;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+  background: rgba(14, 165, 233, 0.3);
+  border-color: #0ea5e9;
+}
+
+.zoom-level {
+  font-size: 10px;
+  color: #888888;
+  text-align: center;
+  padding: 4px;
+  font-family: 'Orbitron', monospace;
+}
+
 /* NASA Timeline Container - Fixed Bottom */
 .nasa-timeline-container {
   position: fixed;
