@@ -32,71 +32,109 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     ctx.translate(panOffset.x, panOffset.y);
     ctx.scale(zoomLevel, zoomLevel);
     
-    // Create realistic Mars terrain background
-    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
-    gradient.addColorStop(0, '#CD853F');   // Peru/Sandy brown center
-    gradient.addColorStop(0.4, '#A0522D'); // Saddle brown
-    gradient.addColorStop(0.7, '#8B4513'); // Saddle brown darker
-    gradient.addColorStop(1, '#654321');   // Dark brown edges
-    ctx.fillStyle = gradient;
+    // Create authentic Mars terrain background - like actual satellite imagery
+    // Base Mars surface color (rusty red-brown like real Mars)
+    const marsGradient = ctx.createLinearGradient(0, 0, width, height);
+    marsGradient.addColorStop(0, '#CD5C5C');    // Indian Red (Mars-like)
+    marsGradient.addColorStop(0.3, '#A0522D');  // Sienna
+    marsGradient.addColorStop(0.6, '#8B4513');  // Saddle Brown  
+    marsGradient.addColorStop(1, '#654321');    // Dark Brown
+    ctx.fillStyle = marsGradient;
     ctx.fillRect(0, 0, width, height);
     
-    // Add realistic Mars surface details - rock formations and craters
-    ctx.globalAlpha = 0.3;
+    // Add Mars surface variations - dusty plains and rocky areas
+    ctx.globalAlpha = 0.4;
     
-    // Create multiple crater formations instead of one large blue circle
-    const craters = [
-      { x: width * 0.2, y: height * 0.3, radius: 60, depth: 0.6 },
-      { x: width * 0.7, y: height * 0.6, radius: 80, depth: 0.8 },
-      { x: width * 0.5, y: height * 0.8, radius: 45, depth: 0.5 },
-      { x: width * 0.8, y: height * 0.2, radius: 35, depth: 0.4 }
+    // Create realistic Mars geological features - NO BLUE AREAS
+    const geologicalFeatures = [
+      // Crater formations (darker brown areas)
+      { x: width * 0.2, y: height * 0.3, radius: 60, color: '#654321', type: 'crater' },
+      { x: width * 0.7, y: height * 0.6, radius: 80, color: '#8B4513', type: 'crater' },
+      { x: width * 0.5, y: height * 0.8, radius: 45, color: '#A0522D', type: 'crater' },
+      
+      // Rocky outcrops (lighter reddish areas)
+      { x: width * 0.4, y: height * 0.2, radius: 40, color: '#CD853F', type: 'rocks' },
+      { x: width * 0.8, y: height * 0.4, radius: 35, color: '#DEB887', type: 'rocks' },
+      { x: width * 0.1, y: height * 0.7, radius: 30, color: '#D2691E', type: 'rocks' }
     ];
     
-    craters.forEach(crater => {
-      const craterGradient = ctx.createRadialGradient(
-        crater.x, crater.y, 0,
-        crater.x, crater.y, crater.radius
+    geologicalFeatures.forEach(feature => {
+      const featureGradient = ctx.createRadialGradient(
+        feature.x, feature.y, 0,
+        feature.x, feature.y, feature.radius
       );
-      craterGradient.addColorStop(0, `rgba(139, 69, 19, ${crater.depth})`);
-      craterGradient.addColorStop(0.6, `rgba(101, 67, 33, ${crater.depth * 0.8})`);
-      craterGradient.addColorStop(1, `rgba(160, 82, 45, ${crater.depth * 0.3})`);
       
-      ctx.fillStyle = craterGradient;
+      if (feature.type === 'crater') {
+        // Crater - darker center, lighter edges
+        featureGradient.addColorStop(0, feature.color);
+        featureGradient.addColorStop(0.6, `${feature.color}80`);
+        featureGradient.addColorStop(1, 'transparent');
+      } else {
+        // Rocky outcrop - lighter center, darker edges
+        featureGradient.addColorStop(0, feature.color);
+        featureGradient.addColorStop(0.8, `${feature.color}60`);
+        featureGradient.addColorStop(1, 'transparent');
+      }
+      
+      ctx.fillStyle = featureGradient;
       ctx.beginPath();
-      ctx.arc(crater.x, crater.y, crater.radius, 0, 2 * Math.PI);
+      ctx.arc(feature.x, feature.y, feature.radius, 0, 2 * Math.PI);
       ctx.fill();
     });
     
-    // Add ancient riverbed/valley formations
-    const valleys = [
-      { startX: width * 0.1, startY: height * 0.4, endX: width * 0.6, endY: height * 0.5, width: 20 },
-      { startX: width * 0.6, startY: height * 0.3, endX: width * 0.9, endY: height * 0.7, width: 15 }
+    // Add ancient dried riverbeds/channels (darker brown lines - NO BLUE)
+    const driedChannels = [
+      { startX: width * 0.1, startY: height * 0.4, endX: width * 0.6, endY: height * 0.5, width: 15 },
+      { startX: width * 0.6, startY: height * 0.3, endX: width * 0.9, endY: height * 0.7, width: 12 },
+      { startX: width * 0.2, startY: height * 0.6, endX: width * 0.7, endY: height * 0.8, width: 10 }
     ];
     
-    valleys.forEach(valley => {
-      ctx.strokeStyle = 'rgba(101, 67, 33, 0.6)';
-      ctx.lineWidth = valley.width;
+    driedChannels.forEach(channel => {
+      ctx.strokeStyle = 'rgba(101, 67, 33, 0.7)'; // Dark brown, not blue
+      ctx.lineWidth = channel.width;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(valley.startX, valley.startY);
-      ctx.lineTo(valley.endX, valley.endY);
+      ctx.moveTo(channel.startX, channel.startY);
+      // Add some curves to make it look more natural
+      const midX = (channel.startX + channel.endX) / 2 + (Math.random() - 0.5) * 50;
+      const midY = (channel.startY + channel.endY) / 2 + (Math.random() - 0.5) * 30;
+      ctx.quadraticCurveTo(midX, midY, channel.endX, channel.endY);
       ctx.stroke();
     });
     
-    // Add rocky outcrops and surface texture
-    for (let i = 0; i < 100; i++) {
+    // Add realistic Mars dust and rock texture
+    for (let i = 0; i < 150; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
-      const size = Math.random() * 6 + 1;
-      const alpha = Math.random() * 0.4 + 0.1;
+      const size = Math.random() * 4 + 1;
+      const alpha = Math.random() * 0.3 + 0.1;
       
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = Math.random() > 0.5 ? 
-        `rgba(${139 + Math.random() * 40}, ${69 + Math.random() * 30}, ${19 + Math.random() * 20}, 1)` :
-        `rgba(${160 + Math.random() * 30}, ${82 + Math.random() * 20}, ${45 + Math.random() * 15}, 1)`;
+      
+      // Only use Mars-appropriate colors (reds, browns, oranges - NO BLUE)
+      const marsColors = [
+        `rgba(${139 + Math.random() * 40}, ${69 + Math.random() * 30}, ${19 + Math.random() * 20}, 1)`, // Browns
+        `rgba(${205 + Math.random() * 30}, ${92 + Math.random() * 40}, ${92 + Math.random() * 20}, 1)`, // Reds
+        `rgba(${222 + Math.random() * 20}, ${184 + Math.random() * 20}, ${135 + Math.random() * 15}, 1)`, // Sandy
+        `rgba(${160 + Math.random() * 30}, ${82 + Math.random() * 20}, ${45 + Math.random() * 15}, 1)`  // Rusty
+      ];
+      
+      ctx.fillStyle = marsColors[Math.floor(Math.random() * marsColors.length)];
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.fill();
+    }
+    
+    // Add some larger rock formations for realism
+    for (let i = 0; i < 20; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const width_rock = Math.random() * 15 + 5;
+      const height_rock = Math.random() * 10 + 3;
+      
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = `rgba(${101 + Math.random() * 40}, ${67 + Math.random() * 20}, ${33 + Math.random() * 15}, 1)`;
+      ctx.fillRect(x, y, width_rock, height_rock);
     }
     
     ctx.globalAlpha = 1;
