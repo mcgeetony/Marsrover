@@ -1487,7 +1487,26 @@ function App() {
               currentPosition={roverData.map.current_position}
               selectedSol={selectedSol}
               onLocationClick={handleLocationClick}
+              zoomLevel={mapZoomLevel}
             />
+          )}
+          
+          {/* Map Zoom Controls */}
+          {!loading && (
+            <div className="map-zoom-controls">
+              <button className="zoom-btn" onClick={handleZoomIn} title="Zoom In">
+                +
+              </button>
+              <button className="zoom-btn" onClick={handleResetZoom} title="Reset Zoom">
+                ⌂
+              </button>
+              <button className="zoom-btn" onClick={handleZoomOut} title="Zoom Out">
+                −
+              </button>
+              <div className="zoom-level">
+                {Math.round(mapZoomLevel * 100)}%
+              </div>
+            </div>
           )}
         </div>
 
