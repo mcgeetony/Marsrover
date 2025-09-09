@@ -895,7 +895,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     };
   }, []);
   
-  const maxSol = Math.max(selectedSol, sols[sols.length - 1] || 1000);
+  const maxSol = 1000; // Fixed max sol for consistent positioning
   const percentage = (selectedSol / maxSol) * 100;
   
   return (
