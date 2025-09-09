@@ -907,11 +907,24 @@ body {
 /* Enhanced Timeline Events */
 .nasa-timeline-event.detailed .event-label {
   min-width: 120px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   border: 1px solid #333333;
   padding: 8px;
   border-radius: 4px;
   margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+}
+
+/* Timeline Event Type Styling */
+.nasa-timeline-event.historic .event-dot {
+  background: #ff6b35;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.6);
+}
+
+.nasa-timeline-event.milestone .event-dot {  
+  background: #00d4ff;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
 }
 
 .event-details {
