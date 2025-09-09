@@ -139,15 +139,7 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoo
           </div>
         );
       })}
-      
-      {/* Map Controls */}
-      <div className="nasa-map-controls">
-        <div className="zoom-controls">
-          <button onClick={() => setZoomLevel(prev => Math.min(prev * 1.2, 3))}>+</button>
-          <div className="zoom-value">{Math.round(zoomLevel * 100)}%</div>
-          <button onClick={() => setZoomLevel(prev => Math.max(prev * 0.8, 0.5))}>-</button>
-        </div>
-      </div>
+
     </div>
   );
 };
