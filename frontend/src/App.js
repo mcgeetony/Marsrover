@@ -1450,14 +1450,14 @@ function App() {
               </div>
               <div className="map-mode-toggle">
                 <button 
-                  className="mode-btn canvas-mode active"
+                  className={`mode-btn canvas-mode ${mapMode === 'canvas' ? 'active' : ''}`}
                   onClick={() => setMapMode('canvas')}
                   title="Canvas Mode (with debug)"
                 >
                   🎨 Canvas
                 </button>
                 <button 
-                  className="mode-btn html-mode"
+                  className={`mode-btn html-mode ${mapMode === 'html' ? 'active' : ''}`}
                   onClick={() => setMapMode('html')}
                   title="HTML Overlay Mode (no blue area)"
                 >
