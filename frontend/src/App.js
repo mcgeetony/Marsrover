@@ -981,15 +981,12 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
           
           {/* Auto-play Controls */}
           <div className="autoplay-controls">
-            {!isAutoPlay ? (
-              <button className="autoplay-btn" onClick={startAutoPlay}>
-                ▶ AUTO PLAY
-              </button>
-            ) : (
-              <button className="autoplay-btn active" onClick={stopAutoPlay}>
-                ⏸ PAUSE
-              </button>
-            )}
+            <button 
+              className={`autoplay-btn ${isAutoPlay ? 'active' : ''}`}
+              onClick={isAutoPlay ? stopAutoPlay : startAutoPlay}
+            >
+              {isAutoPlay ? '⏸ PAUSE' : '▶ AUTO PLAY'}
+            </button>
             <select 
               value={playbackSpeed} 
               onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
