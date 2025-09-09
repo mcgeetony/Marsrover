@@ -259,6 +259,18 @@ frontend:
         agent: "testing"
         comment: "Real-time features partially working. ✅ Live mode toggle works and changes state properly ✅ 'Updated:' timestamp displays correctly ✅ Live indicators animate on telemetry cards ✅ Auto-refresh functionality implemented. ❌ ISSUE: Timeline events filtering problem - only 1 event (SOL 1000) shows instead of all 12 major mission events. Events for SOL 0-999 filtered out because backend sols array (901-1000) doesn't include early mission sols. This affects timeline functionality significantly. Notifications system works but didn't trigger during test (expected 5% chance)."
 
+  - task: "Timeline Events Filtering Issue"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUE IDENTIFIED: Timeline only displays 1 event (SOL 1000 'ANCIENT LAKE') instead of all 12 comprehensive mission events. Root cause: Event filtering logic in lines 701-733 filters events based on sols array from backend. Since backend sols array only contains recent sols (901-1000), all early mission events (SOL 0, 18, 43, 60, 62, 120, 180, 234, 300, 500, 750) get eventPercentage = -10 and are filtered out. SOLUTION NEEDED: Either modify filtering logic to show all events regardless of sols array, or ensure backend provides complete sols array from 0 to current sol."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
