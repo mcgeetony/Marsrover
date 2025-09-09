@@ -537,21 +537,21 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     }
   }, [sols, selectedSol, onSolChange]);
   
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    handleInteraction(e);
-    stopAutoPlay(); // Stop auto-play when user interacts
-  };
-  
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (isDragging) {
       handleInteraction(e);
     }
-  };
+  }, [isDragging, handleInteraction]);
   
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
+  
+  const handleMouseDown = useCallback((e) => {
+    setIsDragging(true);
+    handleInteraction(e);
+    stopAutoPlay(); // Stop auto-play when user interacts
+  }, [handleInteraction, stopAutoPlay]);
   
   useEffect(() => {
     if (isDragging) {
@@ -562,7 +562,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
   
   // Cleanup auto-play on unmount
   useEffect(() => {
