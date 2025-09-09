@@ -279,11 +279,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Advanced Timeline CSS Support"
-    - "Dust Properties Integration" 
-    - "Real-time Data Integration"
-  stuck_tasks: []
-  test_all: true
+    - "Timeline Events Filtering Issue"
+  stuck_tasks: 
+    - "Timeline Events Filtering Issue"
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
