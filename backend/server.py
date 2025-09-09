@@ -94,7 +94,7 @@ async def fetch_nasa_rover_data(sol: int = None):
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Get photos for the specified sol or latest
-            if sol:
+            if sol is not None:
                 url = f"{NASA_BASE_URL}/rovers/perseverance/photos?sol={sol}&api_key={NASA_API_KEY}"
             else:
                 url = f"{NASA_BASE_URL}/rovers/perseverance/latest_photos?api_key={NASA_API_KEY}"
