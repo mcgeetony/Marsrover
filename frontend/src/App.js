@@ -995,12 +995,12 @@ function App() {
             
             <NASATelemetryCard
               title="Dust Properties"
-              value="203"  
-              unit="K"
+              value={Math.round(dustData[dustData.length - 1] || 0)}  
+              unit="μg/m³"
               data={dustData}
               color="#8b5cf6"
               type="bar"
-              subtitle="PARTICLE COUNT | VISIBILITY GOOD"
+              subtitle="ATMOSPHERIC DUST LEVEL | OPACITY 0.8"
               isLive={isLiveMode}
             />
           </div>
