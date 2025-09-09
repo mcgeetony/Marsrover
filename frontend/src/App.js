@@ -840,10 +840,25 @@ function App() {
     console.log('Location clicked:', location);
   }, []);
   
+  // Generate optimized telemetry data - Move all hooks before conditional returns
+  const generateTelemetryData = useCallback((baseValue, variation, sols = 50) => {
+    return Array.from({length: sols}, (_, i) => {
+      const sol = Math.max(0, selectedSol - sols + i + 1);
+      return Math.max(0, baseValue + variation * Math.sin(sol * 0.1) + (Math.random() - 0.5) * variation * 0.2);
+    });
+  }, [selectedSol]);
+  
+  const tempData = React.useMemo(() => generateTelemetryData(203, 20), [generateTelemetryData]);
+  const windData = React.useMemo(() => generateTelemetryData(32, 15), [generateTelemetryData]);
+  const radiationData = React.useMemo(() => generateTelemetryData(203, 30), [generateTelemetryData]);
+  const distanceData = React.useMemo(() => generateTelemetryData(2, 0.5), [generateTelemetryData]);
+  const dustData = React.useMemo(() => generateTelemetryData(203, 40), [generateTelemetryData]);
+
   useEffect(() => {
     fetchRoverData();
   }, [fetchRoverData]);
   
+  // Conditional returns AFTER all hooks
   if (loading) {
     return (
       <div className="nasa-loading">
@@ -876,20 +891,6 @@ function App() {
   }
   
   if (!roverData) return null;
-  
-  // Generate optimized telemetry data
-  const generateTelemetryData = useCallback((baseValue, variation, sols = 50) => {
-    return Array.from({length: sols}, (_, i) => {
-      const sol = Math.max(0, selectedSol - sols + i + 1);
-      return Math.max(0, baseValue + variation * Math.sin(sol * 0.1) + (Math.random() - 0.5) * variation * 0.2);
-    });
-  }, [selectedSol]);
-  
-  const tempData = React.useMemo(() => generateTelemetryData(203, 20), [generateTelemetryData]);
-  const windData = React.useMemo(() => generateTelemetryData(32, 15), [generateTelemetryData]);
-  const radiationData = React.useMemo(() => generateTelemetryData(203, 30), [generateTelemetryData]);
-  const distanceData = React.useMemo(() => generateTelemetryData(2, 0.5), [generateTelemetryData]);
-  const dustData = React.useMemo(() => generateTelemetryData(203, 40), [generateTelemetryData]);
   
   return (
     <div className="nasa-app">
