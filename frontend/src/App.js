@@ -891,6 +891,10 @@ function App() {
     console.log('Location clicked:', location);
   }, []);
   
+  const handleNotificationDismiss = useCallback((index) => {
+    setNotifications(prev => prev.filter((_, i) => i !== index));
+  }, []);
+  
   // Generate optimized telemetry data - Move all hooks before conditional returns
   const generateTelemetryData = useCallback((baseValue, variation, sols = 50) => {
     return Array.from({length: sols}, (_, i) => {
