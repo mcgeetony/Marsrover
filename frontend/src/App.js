@@ -1447,13 +1447,39 @@ function App() {
               <div className="map-coordinates">
                 {roverData.map.current_position.lat.toFixed(5)}°N, {roverData.map.current_position.lon.toFixed(5)}°E
               </div>
+              <div className="map-mode-toggle">
+                <button 
+                  className="mode-btn canvas-mode active"
+                  onClick={() => setMapMode('canvas')}
+                  title="Canvas Mode (with debug)"
+                >
+                  🎨 Canvas
+                </button>
+                <button 
+                  className="mode-btn html-mode"
+                  onClick={() => setMapMode('html')}
+                  title="HTML Overlay Mode (no blue area)"
+                >
+                  💡 HTML
+                </button>
+              </div>
             </div>
-            <CarbonMarsMap 
-              route={roverData.map.route}
-              currentPosition={roverData.map.current_position}
-              selectedSol={selectedSol}
-              onLocationClick={handleLocationClick}
-            />
+            
+            {mapMode === 'html' ? (
+              <HTMLOverlayMarsMap 
+                route={roverData.map.route}
+                currentPosition={roverData.map.current_position}
+                selectedSol={selectedSol}
+                onLocationClick={handleLocationClick}
+              />
+            ) : (
+              <CarbonMarsMap 
+                route={roverData.map.route}
+                currentPosition={roverData.map.current_position}
+                selectedSol={selectedSol}
+                onLocationClick={handleLocationClick}
+              />
+            )}
           </div>
         </div>
 
