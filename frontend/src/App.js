@@ -1356,60 +1356,70 @@ function App() {
           </div>
           
           <div className="telemetry-stack">
-            <NASATelemetryCard
-              title="Temperature"
-              value="203"
-              unit="K (-70°C)"
-              data={tempData}
-              color="#00ff88"
-              type="line"
-              subtitle="AVERAGE 200K | RANGE 180K-220K"
-              isLive={isLiveMode}
-            />
+            {(telemetryGroup === 'all' || telemetryGroup === 'environmental') && (
+              <NASATelemetryCard
+                title="Temperature"
+                value="203"
+                unit="K (-70°C)"
+                data={tempData}
+                color="#00ff88"
+                type="line"
+                subtitle="AVERAGE 200K | RANGE 180K-220K"
+                isLive={isLiveMode}
+              />
+            )}
             
-            <NASATelemetryCard
-              title="Wind Speed"
-              value="32"
-              unit="KMH"
-              data={windData}
-              color="#0ea5e9"
-              type="bar"
-              subtitle="MAX 45 KMH | DIR NE"
-              isLive={isLiveMode}
-            />
+            {(telemetryGroup === 'all' || telemetryGroup === 'environmental') && (
+              <NASATelemetryCard
+                title="Wind Speed"
+                value="32"
+                unit="KMH"
+                data={windData}
+                color="#0ea5e9"
+                type="bar"
+                subtitle="MAX 45 KMH | DIR NE"
+                isLive={isLiveMode}
+              />
+            )}
             
-            <NASATelemetryCard
-              title="Radiation"
-              value="203"
-              unit="K"
-              data={radiationData}
-              color="#f59e0b"
-              type="bar"
-              subtitle="LEVEL NORMAL | SAFE RANGE"
-              isLive={isLiveMode}
-            />
+            {(telemetryGroup === 'all' || telemetryGroup === 'systems') && (
+              <NASATelemetryCard
+                title="Radiation"
+                value="203"
+                unit="K"
+                data={radiationData}
+                color="#f59e0b"
+                type="bar"
+                subtitle="LEVEL NORMAL | SAFE RANGE"
+                isLive={isLiveMode}
+              />
+            )}
             
-            <NASATelemetryCard
-              title="Distance Traveled"
-              value="+2"
-              unit="m/sec"
-              data={distanceData}
-              color="#10b981"
-              type="line"
-              subtitle="72 KM/H AVG | 1 HR 12 MIN"
-              isLive={isLiveMode}
-            />
+            {(telemetryGroup === 'all' || telemetryGroup === 'systems') && (
+              <NASATelemetryCard
+                title="Distance Traveled"
+                value="+2"
+                unit="m/sec"
+                data={distanceData}
+                color="#10b981"
+                type="line"
+                subtitle="72 KM/H AVG | 1 HR 12 MIN"
+                isLive={isLiveMode}
+              />
+            )}
             
-            <NASATelemetryCard
-              title="Dust Properties"
-              value={Math.round(dustData[dustData.length - 1] || 0)}  
-              unit="μg/m³"
-              data={dustData}
-              color="#8b5cf6"
-              type="bar"
-              subtitle="ATMOSPHERIC DUST LEVEL | OPACITY 0.8"
-              isLive={isLiveMode}
-            />
+            {(telemetryGroup === 'all' || telemetryGroup === 'atmospheric') && (
+              <NASATelemetryCard
+                title="Dust Properties"
+                value={Math.round(dustData[dustData.length - 1] || 0)}  
+                unit="μg/m³"
+                data={dustData}
+                color="#8b5cf6"
+                type="bar"
+                subtitle="ATMOSPHERIC DUST LEVEL | OPACITY 0.8"
+                isLive={isLiveMode}
+              />
+            )}
           </div>
         </div>
 
