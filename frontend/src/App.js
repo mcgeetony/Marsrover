@@ -949,6 +949,12 @@ function App() {
   
   return (
     <div className="nasa-app">
+      {/* Real-time Notifications */}
+      <NASANotifications 
+        notifications={notifications} 
+        onDismiss={handleNotificationDismiss} 
+      />
+      
       {/* NASA Header with Real-time Status */}
       <header className="nasa-header">
         <div className="header-left">
