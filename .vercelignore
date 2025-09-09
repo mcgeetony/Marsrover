@@ -1,0 +1,26 @@
+# Development files
+backend/venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/*.log
+backend/server-original.py
+
+# Frontend development
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.development
+
+# General
+.git/
+.emergent/
+*.md
+tests/
+scripts/
+docker-compose.yml
+start.sh
+build.sh
+
+# Keep only essential files for deployment
+!backend/server.py
+!backend/requirements.txt
+!frontend/build/
