@@ -814,27 +814,35 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     return events;
   }, [searchQuery, filterType]);
   
-  // Auto-play functionality
+  // Enhanced Auto-play functionality - from SOL 1 to current
   const startAutoPlay = useCallback(() => {
     if (autoPlayRef.current) return;
     
     setIsAutoPlay(true);
-    const events = filteredEvents.filter(event => event.sol >= selectedSol);
+    // Start from SOL 1 and go through all events up to current SOL
+    const eventsToPlay = filteredEvents.filter(event => event.sol >= 0 && event.sol <= 1000);
     let currentIndex = 0;
     
+    // Start from SOL 1
+    onSolChange(1);
+    
     const playNext = () => {
-      if (currentIndex < events.length) {
-        onSolChange(events[currentIndex].sol);
+      if (currentIndex < eventsToPlay.length) {
+        onSolChange(eventsToPlay[currentIndex].sol);
         currentIndex++;
-        autoPlayRef.current = setTimeout(playNext, 3000 / playbackSpeed);
+        // Speed-controlled animation timing
+        autoPlayRef.current = setTimeout(playNext, 2000 / playbackSpeed);
       } else {
+        // End at current SOL (1000)
+        onSolChange(1000);
         setIsAutoPlay(false);
         autoPlayRef.current = null;
       }
     };
     
-    playNext();
-  }, [filteredEvents, selectedSol, onSolChange, playbackSpeed]);
+    // Start the sequence after initial delay
+    autoPlayRef.current = setTimeout(playNext, 1000 / playbackSpeed);
+  }, [filteredEvents, onSolChange, playbackSpeed]);
   
   const stopAutoPlay = useCallback(() => {
     if (autoPlayRef.current) {
