@@ -162,34 +162,31 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     const animatedRoute = filteredRoute.slice(0, animatedRouteLength);
     
     if (animatedRoute.length > 1) {
-      // Draw route path with enhanced styling
+      // Draw route path - make it a clean line, not a filled area
       ctx.shadowColor = '#0f62fe';
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 4;
       ctx.strokeStyle = '#0f62fe';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3; // Reduced from 4 to prevent thick areas
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      ctx.globalCompositeOperation = 'source-over'; // Ensure no weird blending
       ctx.beginPath();
       
-      // Draw smooth curved path
-      for (let i = 0; i < animatedRoute.length; i++) {
-        const x = lonToX(animatedRoute[i].lon);
-        const y = latToY(animatedRoute[i].lat);
+      // Draw simple path without complex curves that might create fills
+      animatedRoute.forEach((point, index) => {
+        const x = lonToX(point.lon);
+        const y = latToY(point.lat);
         
-        if (i === 0) {
+        if (index === 0) {
           ctx.moveTo(x, y);
-        } else if (i === animatedRoute.length - 1) {
-          ctx.lineTo(x, y);
         } else {
-          const nextX = lonToX(animatedRoute[i + 1].lon);
-          const nextY = latToY(animatedRoute[i + 1].lat);
-          const cpX = (x + nextX) / 2;
-          const cpY = (y + nextY) / 2;
-          ctx.quadraticCurveTo(x, y, cpX, cpY);
+          ctx.lineTo(x, y);
         }
-      }
+      });
+      
       ctx.stroke();
       ctx.shadowBlur = 0;
+      ctx.globalCompositeOperation = 'source-over';
       
       // Draw sample collection points and waypoints
       animatedRoute.forEach((point, index) => {
