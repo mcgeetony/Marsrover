@@ -985,31 +985,31 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
       
       {/* Enhanced Navigation */}
       <div className="timeline-navigation">
-        <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 100))} disabled={selectedSol <= sols[0]}>
+        <button onClick={() => onSolChange(Math.max(0, selectedSol - 100))} disabled={selectedSol <= 0}>
           ⏪ -100 SOLS
         </button>
-        <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 50))} disabled={selectedSol <= sols[0]}>
-          ⏪ -50 SOLS
+        <button onClick={() => onSolChange(Math.max(0, selectedSol - 30))} disabled={selectedSol <= 0}>
+          ⏪ -30 SOLS
         </button>
-        <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 10))} disabled={selectedSol <= sols[0]}>
+        <button onClick={() => onSolChange(Math.max(0, selectedSol - 10))} disabled={selectedSol <= 0}>
           ⏮ -10 SOLS
         </button>
-        <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 1))} disabled={selectedSol <= sols[0]}>
-          ⏮ -1 SOLS
+        <button onClick={() => onSolChange(Math.max(0, selectedSol - 5))} disabled={selectedSol <= 0}>
+          ⏮ -5 SOLS
         </button>
         <button className="home-btn" onClick={() => onSolChange(1000)}>
-          ⌂ SOL 1000
+          ⌂ CURRENT
         </button>
-        <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 1))} disabled={selectedSol >= sols[sols.length - 1]}>
-          ⏭ +1 SOLS
+        <button onClick={() => onSolChange(Math.min(1000, selectedSol + 5))} disabled={selectedSol >= 1000}>
+          ⏭ +5 SOLS
         </button>
-        <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 10))} disabled={selectedSol >= sols[sols.length - 1]}>
+        <button onClick={() => onSolChange(Math.min(1000, selectedSol + 10))} disabled={selectedSol >= 1000}>
           ⏭ +10 SOLS
         </button>
-        <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 50))} disabled={selectedSol >= sols[sols.length - 1]}>
-          +50 SOLS ⏩
+        <button onClick={() => onSolChange(Math.min(1000, selectedSol + 30))} disabled={selectedSol >= 1000}>
+          +30 SOLS ⏩
         </button>
-        <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 100))} disabled={selectedSol >= sols[sols.length - 1]}>
+        <button onClick={() => onSolChange(Math.min(1000, selectedSol + 100))} disabled={selectedSol >= 1000}>
           +100 SOLS ⏩
         </button>
       </div>
