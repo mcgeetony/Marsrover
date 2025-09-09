@@ -350,8 +350,8 @@ body {
 }
 
 .card-chart {
-  margin: 12px 0;
-  height: 60px;
+  margin: 8px 0;
+  height: 45px;
   display: flex;
   align-items: center;
 }
