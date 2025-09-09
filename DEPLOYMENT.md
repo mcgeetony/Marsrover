@@ -10,9 +10,9 @@ git commit -m "Ready for Vercel deployment"
 git push origin main
 ```
 
-### 2. Deploy to Vercel
+### 2. Deploy to Vercel (Size Optimized)
 
-#### Option A: Using Vercel CLI (Recommended)
+#### Option A: Using NPM Script (Recommended)
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -20,7 +20,16 @@ npm i -g vercel
 # Login to Vercel
 vercel login
 
-# Deploy from the root directory
+# Optimized deployment (handles size optimization automatically)
+npm run deploy
+```
+
+#### Option B: Manual Optimization
+```bash
+# Build optimized version
+npm run build:vercel
+
+# Deploy
 vercel --prod
 ```
 
