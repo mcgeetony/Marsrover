@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "mars-rover-mission-control",
   "builds": [
     {
       "src": "frontend/package.json",
@@ -10,17 +9,14 @@
       }
     },
     {
-      "src": "backend/server-vercel.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+      "src": "backend/server.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/server-vercel.py"
+      "dest": "backend/server.py"
     },
     {
       "src": "/(.*)",
@@ -29,12 +25,5 @@
   ],
   "env": {
     "NASA_API_KEY": "@nasa-api-key"
-  },
-  "functions": {
-    "backend/server-vercel.py": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  },
-  "installCommand": "cd backend && pip install -r requirements-vercel.txt && cd ../frontend && yarn install"
+  }
 }
