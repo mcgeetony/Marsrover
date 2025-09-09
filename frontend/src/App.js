@@ -700,36 +700,34 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
           {/* Mission Events */}
           {filteredEvents.map((event, index) => {
             const eventSol = event.sol;
-            const eventIndex = sols.indexOf(eventSol) || sols.findIndex(s => s >= eventSol);
-            const eventPercentage = eventIndex >= 0 ? (eventIndex / (sols.length - 1)) * 100 : -10;
+            const maxSol = Math.max(selectedSol, sols[sols.length - 1] || 1000);
+            const eventPercentage = (eventSol / maxSol) * 100;
             
-            if (eventPercentage >= 0 && eventPercentage <= 100) {
-              return (
-                <div 
-                  key={index}
-                  className={`nasa-timeline-event ${event.type} ${selectedSol >= eventSol ? 'completed' : 'upcoming'} ${timelineMode}`}
-                  style={{ left: `${eventPercentage}%` }}
-                  onClick={() => onSolChange(eventSol)}
-                >
-                  <div className="event-marker">
-                    <div className="event-dot"></div>
-                  </div>
-                  <div className="event-label">
-                    <div className="event-title">{event.shortLabel}</div>
-                    <div className="event-sol">SOL {eventSol}</div>
-                    {timelineMode === 'detailed' && (
-                      <div className="event-details">
-                        <div className="event-description">{event.description}</div>
-                        <div className="event-instruments">
-                          {event.instruments.join(', ')}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            // Show all events on the timeline regardless of sols array
+            return (
+              <div 
+                key={index}
+                className={`nasa-timeline-event ${event.type} ${selectedSol >= eventSol ? 'completed' : 'upcoming'} ${timelineMode}`}
+                style={{ left: `${Math.min(eventPercentage, 95)}%` }}
+                onClick={() => onSolChange(eventSol)}
+              >
+                <div className="event-marker">
+                  <div className="event-dot"></div>
                 </div>
-              );
-            }
-            return null;
+                <div className="event-label">
+                  <div className="event-title">{event.shortLabel}</div>
+                  <div className="event-sol">SOL {eventSol}</div>
+                  {timelineMode === 'detailed' && (
+                    <div className="event-details">
+                      <div className="event-description">{event.description}</div>
+                      <div className="event-instruments">
+                        {event.instruments.join(', ')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
           })}
           
           <div 
