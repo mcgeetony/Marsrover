@@ -2,20 +2,25 @@
 
 echo "🚀 Preparing Mars Rover Mission Control for Vercel deployment..."
 
-# Create a clean backend directory for Vercel
-echo "📦 Preparing lightweight backend..."
-
-# Copy only essential files to backend
-cp backend/server-vercel.py backend/server.py
-cp backend/requirements-vercel.txt backend/requirements.txt
-
 echo "📊 Backend size optimization:"
 echo "Before: $(du -sh backend/ | cut -f1)"
 
-# Remove unnecessary files
+# Create backup of original files
+echo "📦 Creating backups..."
+cp backend/server.py backend/server-original.py 2>/dev/null || true
+cp backend/requirements.txt backend/requirements-original.txt 2>/dev/null || true
+
+# Replace with lightweight versions
+echo "📦 Installing lightweight backend..."
+cp backend/server-vercel.py backend/server.py
+cp backend/requirements-vercel.txt backend/requirements.txt
+
+# Remove heavy unnecessary files and directories
+echo "🧹 Cleaning up heavy files..."
+rm -rf backend/venv/
+rm -rf backend/__pycache__/
+rm -rf backend/.pytest_cache/
 rm -f backend/*.log
-rm -rf backend/__pycache__
-rm -rf backend/.pytest_cache
 rm -f backend/server-vercel.py
 
 echo "After: $(du -sh backend/ | cut -f1)"
