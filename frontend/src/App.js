@@ -5,7 +5,127 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Enhanced Carbon Mars Map with debug mode and real NASA tiles option
+// 💡 ALTERNATIVE: HTML/CSS Overlay Mars Map (Fallback Solution)
+const HTMLOverlayMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
+  const mapRef = useRef(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  
+  // Calculate route bounds
+  const getRouteBounds = () => {
+    if (!route || route.length === 0) return null;
+    
+    const lats = route.map(p => p.lat);
+    const lons = route.map(p => p.lon);
+    return {
+      minLat: Math.min(...lats) - 0.002,
+      maxLat: Math.max(...lats) + 0.002,
+      minLon: Math.min(...lons) - 0.002,
+      maxLon: Math.max(...lons) + 0.002
+    };
+  };
+  
+  // Convert lat/lon to percentage position
+  const coordToPercent = (lat, lon) => {
+    const bounds = getRouteBounds();
+    if (!bounds) return { x: 50, y: 50 };
+    
+    const x = ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * 100;
+    const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 100;
+    
+    return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
+  };
+  
+  const filteredRoute = route ? route.filter(point => point.sol <= selectedSol) : [];
+  
+  return (
+    <div className="html-mars-map" ref={mapRef}>
+      {/* NASA Mars Background */}
+      <div className="mars-background"></div>
+      
+      {/* Route Path using SVG */}
+      <svg className="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        {filteredRoute.length > 1 && (
+          <polyline
+            points={filteredRoute.map(point => {
+              const pos = coordToPercent(point.lat, point.lon);
+              return `${pos.x},${pos.y}`;
+            }).join(' ')}
+            fill="none"
+            stroke="#0f62fe"
+            strokeWidth="0.3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
+      
+      {/* Sample Collection Points */}
+      {filteredRoute.map((point, index) => {
+        if (point.sol % 60 !== 0) return null; // Only sample points
+        
+        const pos = coordToPercent(point.lat, point.lon);
+        
+        return (
+          <div
+            key={`sample-${index}`}
+            className="sample-pin"
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`
+            }}
+            title={`Sample ${Math.floor(point.sol / 60)} - Sol ${point.sol}`}
+          >
+            <div className="pin-marker">
+              {Math.floor(point.sol / 60)}
+            </div>
+          </div>
+        );
+      })}
+      
+      {/* Current Position */}
+      {currentPosition && (
+        <div
+          className="current-position"
+          style={{
+            left: `${coordToPercent(currentPosition.lat, currentPosition.lon).x}%`,
+            top: `${coordToPercent(currentPosition.lat, currentPosition.lon).y}%`
+          }}
+          title={`Current Position - Sol ${selectedSol}`}
+        >
+          <div className="rover-indicator">
+            <div className="rover-center"></div>
+            <div className="rover-direction"></div>
+          </div>
+        </div>
+      )}
+      
+      {/* Geological Features */}
+      <div className="geological-features">
+        <div className="feature" style={{ left: '15%', top: '25%' }}>
+          <div className="feature-circle"></div>
+          <div className="feature-label">NERETVA VALLIS</div>
+        </div>
+        <div className="feature" style={{ left: '65%', top: '45%' }}>
+          <div className="feature-circle"></div>
+          <div className="feature-label">BELVA CRATER</div>
+        </div>
+        <div className="feature" style={{ left: '80%', top: '75%' }}>
+          <div className="feature-circle"></div>
+          <div className="feature-label">DELTA FORMATION</div>
+        </div>
+      </div>
+      
+      {/* Map Controls */}
+      <div className="html-map-controls">
+        <button onClick={() => setZoomLevel(prev => Math.min(prev * 1.2, 3))}>+</button>
+        <button onClick={() => setZoomLevel(prev => Math.max(prev * 0.8, 0.5))}>−</button>
+        <button onClick={() => { setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}>⌂</button>
+        <div className="zoom-display">{Math.round(zoomLevel * 100)}%</div>
+      </div>
+    </div>
+  );
+};
 const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
   const canvasRef = useRef(null);
   const [animationProgress, setAnimationProgress] = useState(1);
