@@ -695,6 +695,19 @@ body {
   font-style: italic;
 }
 
+/* NASA Timeline Container - Fixed Bottom */
+.nasa-timeline-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000000;
+  border-top: 2px solid #333333;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.8);
+}
+
 /* Advanced Mission Timeline - Enhanced */
 .advanced-mission-timeline {
   padding: 20px 24px;
