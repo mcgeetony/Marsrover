@@ -851,7 +851,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, x / rect.width));
-    const maxSol = Math.max(selectedSol, 1000);
+    const maxSol = 1000; // Fixed max sol for consistent positioning
     const newSol = Math.round(percentage * maxSol);
     
     if (newSol !== selectedSol) {
