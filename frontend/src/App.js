@@ -1082,6 +1082,12 @@ function App() {
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [telemetryMode, setTelemetryMode] = useState('vertical'); // 'vertical' or 'horizontal'
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [telemetryGroup, setTelemetryGroup] = useState('all'); // 'all', 'environmental', 'systems', 'atmospheric'
+  const [mapZoomLevel, setMapZoomLevel] = useState(1);
+  const [mapZoomMemory, setMapZoomMemory] = useState({});
   
   // Real-time data fetching with caching
   const fetchRoverData = useCallback(async (sol = null, forceRefresh = false) => {
