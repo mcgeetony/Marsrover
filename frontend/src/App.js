@@ -843,12 +843,39 @@ function App() {
     }
   }, []);
   
-  // Auto-refresh for live mode
+  // Auto-refresh for live mode with discovery simulation  
   useEffect(() => {
     if (!isLiveMode) return;
     
     const interval = setInterval(() => {
       fetchRoverData(selectedSol, true); // Force refresh for live data
+      
+      // Simulate discoveries occasionally (5% chance)
+      if (Math.random() < 0.05 && selectedSol) {
+        const discoveries = [
+          {
+            type: 'discovery',
+            title: 'GEOLOGICAL FORMATION DETECTED',
+            message: 'Unusual rock stratification pattern identified via SUPERCAM analysis',
+            sol: selectedSol
+          },
+          {
+            type: 'sample',
+            title: 'SAMPLE COLLECTION CANDIDATE',
+            message: 'High-priority target identified for future drilling operation',
+            sol: selectedSol
+          },
+          {
+            type: 'data',
+            title: 'ATMOSPHERIC ANOMALY',
+            message: 'Unexpected methane trace detected in current atmospheric readings',
+            sol: selectedSol
+          }
+        ];
+        
+        const randomDiscovery = discoveries[Math.floor(Math.random() * discoveries.length)];
+        setNotifications(prev => [...prev.slice(-2), randomDiscovery]); // Keep only last 3
+      }
     }, DataCache.UPDATE_INTERVAL);
     
     return () => clearInterval(interval);
