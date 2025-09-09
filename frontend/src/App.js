@@ -1356,8 +1356,18 @@ function App() {
           </div>
           
           <div className="telemetry-stack">
-            {(telemetryGroup === 'all' || telemetryGroup === 'environmental') && (
-              <NASATelemetryCard
+            {loading ? (
+              <>
+                <TelemetryCardSkeleton />
+                <TelemetryCardSkeleton />
+                <TelemetryCardSkeleton />
+                <TelemetryCardSkeleton />
+                <TelemetryCardSkeleton />
+              </>
+            ) : (
+              <>
+                {(telemetryGroup === 'all' || telemetryGroup === 'environmental') && (
+                  <NASATelemetryCard
                 title="Temperature"
                 value="203"
                 unit="K (-70°C)"
