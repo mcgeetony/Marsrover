@@ -162,31 +162,28 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     const animatedRoute = filteredRoute.slice(0, animatedRouteLength);
     
     if (animatedRoute.length > 1) {
-      // Draw route path - make it a clean line, not a filled area
-      ctx.shadowColor = '#0f62fe';
-      ctx.shadowBlur = 4;
+      // SIMPLE ROUTE DRAWING - No complex paths that can create fills
       ctx.strokeStyle = '#0f62fe';
-      ctx.lineWidth = 3; // Reduced from 4 to prevent thick areas
+      ctx.lineWidth = 2;
       ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalCompositeOperation = 'source-over'; // Ensure no weird blending
-      ctx.beginPath();
+      ctx.setLineDash([]);
       
-      // Draw simple path without complex curves that might create fills
-      animatedRoute.forEach((point, index) => {
-        const x = lonToX(point.lon);
-        const y = latToY(point.lat);
+      // Draw each segment individually to prevent path closing issues
+      for (let i = 0; i < animatedRoute.length - 1; i++) {
+        const currentPoint = animatedRoute[i];
+        const nextPoint = animatedRoute[i + 1];
         
-        if (index === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      });
-      
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.globalCompositeOperation = 'source-over';
+        const x1 = lonToX(currentPoint.lon);
+        const y1 = latToY(currentPoint.lat);
+        const x2 = lonToX(nextPoint.lon);
+        const y2 = latToY(nextPoint.lat);
+        
+        // Draw individual line segment
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
       
       // Draw sample collection points and waypoints
       animatedRoute.forEach((point, index) => {
