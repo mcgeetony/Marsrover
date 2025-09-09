@@ -246,15 +246,18 @@ frontend:
 
   - task: "Real-time Data Integration"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Successfully implemented real-time features: auto-refresh with live mode toggle, discovery notifications system with simulated geological formations/sample collection/atmospheric anomalies, notification dismissal system."
+      - working: false
+        agent: "testing"
+        comment: "Real-time features partially working. ✅ Live mode toggle works and changes state properly ✅ 'Updated:' timestamp displays correctly ✅ Live indicators animate on telemetry cards ✅ Auto-refresh functionality implemented. ❌ ISSUE: Timeline events filtering problem - only 1 event (SOL 1000) shows instead of all 12 major mission events. Events for SOL 0-999 filtered out because backend sols array (901-1000) doesn't include early mission sols. This affects timeline functionality significantly. Notifications system works but didn't trigger during test (expected 5% chance)."
 
 metadata:
   created_by: "testing_agent"
