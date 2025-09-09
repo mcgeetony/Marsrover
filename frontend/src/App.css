@@ -1464,35 +1464,7 @@ body {
   font-style: italic;
 }
 
-/* Timeline Analytics */
-.timeline-analytics {
-  margin-top: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid #333333;
-  border-radius: 4px;
-  backdrop-filter: blur(5px);
-}
 
-.timeline-analytics::before {
-  content: "MISSION ANALYTICS";
-  display: block;
-  font-family: 'Orbitron', monospace;
-  font-size: 10px;
-  font-weight: 600;
-  color: #888888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #333333;
-}
-
-.analytics-summary {
-  display: flex;
-  justify-content: space-around;
-  gap: 16px;
-}
 
 .summary-stat {
   display: flex;
