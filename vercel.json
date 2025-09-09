@@ -31,7 +31,7 @@
     "NASA_API_KEY": "@nasa-api-key"
   },
   "functions": {
-    "backend/server.py": {
+    "backend/server-vercel.py": {
       "maxDuration": 30,
       "memory": 1024
     }
