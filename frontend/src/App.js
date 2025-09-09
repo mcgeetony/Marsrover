@@ -1013,30 +1013,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
           +100 SOLS ⏩
         </button>
       </div>
-      
-      {/* Timeline Analytics Panel */}
-      {timelineMode === 'analytics' && (
-        <div className="timeline-analytics">
-          <div className="analytics-summary">
-            <div className="summary-stat">
-              <span className="stat-number">{filteredEvents.length}</span>
-              <span className="stat-label">Mission Events</span>
-            </div>
-            <div className="summary-stat">
-              <span className="stat-number">{filteredEvents.filter(e => e.sol <= selectedSol).length}</span>
-              <span className="stat-label">Completed</span>
-            </div>
-            <div className="summary-stat">
-              <span className="stat-number">{filteredEvents.filter(e => e.category === 'sampling').length}</span>
-              <span className="stat-label">Samples</span>
-            </div>
-            <div className="summary-stat">
-              <span className="stat-number">{filteredEvents.filter(e => e.category === 'discovery').length}</span>
-              <span className="stat-label">Discoveries</span>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
