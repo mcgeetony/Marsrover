@@ -280,7 +280,7 @@ body {
 
 .nasa-telemetry-card {
   background: #000000;
-  padding: 16px;
+  padding: 12px;
   position: relative;
   border-left: 3px solid transparent;
   transition: all 0.2s ease;
