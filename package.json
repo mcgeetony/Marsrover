@@ -13,6 +13,7 @@
     "build": "cd frontend && yarn build",
     "build:vercel": "./build-vercel.sh",
     "deploy": "./build-vercel.sh && vercel --prod",
+    "restore:dev": "./restore-dev.sh",
     "docker": "docker-compose up --build",
     "docker:down": "docker-compose down"
   },
