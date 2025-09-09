@@ -231,15 +231,18 @@ frontend:
 
   - task: "Dust Properties Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Successfully implemented dust properties in backend API: dust_opacity, dust_storm_activity, dust_accumulation, atmospheric_dust_levels. Frontend already displays enhanced dust telemetry card with proper units (μg/m³)."
+      - working: true
+        agent: "testing"
+        comment: "Dust Properties integration working perfectly. Fifth telemetry card 'DUST PROPERTIES' displays with correct units (μg/m³), real-time data updates, bar chart visualization, and proper MIN/MAX/NOW statistics. Backend provides realistic dust atmospheric data. This NEW FEATURE is fully functional and integrated into the telemetry dashboard."
 
   - task: "Real-time Data Integration"
     implemented: true
