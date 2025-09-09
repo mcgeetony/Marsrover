@@ -1446,12 +1446,16 @@ function App() {
             </div>
           </div>
           
-          <NASAMarsMap 
-            route={roverData.map.route}
-            currentPosition={roverData.map.current_position}
-            selectedSol={selectedSol}
-            onLocationClick={handleLocationClick}
-          />
+          {loading ? (
+            <MapSkeleton />
+          ) : (
+            <NASAMarsMap 
+              route={roverData.map.route}
+              currentPosition={roverData.map.current_position}
+              selectedSol={selectedSol}
+              onLocationClick={handleLocationClick}
+            />
+          )}
         </div>
 
         {/* Right Panel - Camera Systems */}
