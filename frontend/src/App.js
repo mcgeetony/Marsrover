@@ -33,7 +33,6 @@ const DataCache = {
 const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoomLevel = 1 }) => {
   const mapRef = useRef(null);
   const canvasRef = useRef(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   
   // Memoized coordinate calculations for performance
