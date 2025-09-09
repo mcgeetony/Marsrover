@@ -87,7 +87,7 @@ class MarsRoverData(BaseModel):
 # Cache for rover data
 rover_data_cache = {}
 cache_timestamp = None
-CACHE_DURATION = 0  # Disable cache for testing
+CACHE_DURATION = 300  # 5 minutes
 
 async def fetch_nasa_rover_data(sol: int = None):
     """Fetch data from NASA Mars Photos API for Perseverance rover"""
