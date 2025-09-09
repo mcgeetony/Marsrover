@@ -46,6 +46,10 @@ class Metrics(BaseModel):
     charge: int  # Battery percentage
     temperature: float  # Celsius
     radiation: float  # microSieverts/hour
+    dust_opacity: float  # Atmospheric dust opacity (tau)
+    dust_storm_activity: int  # Storm activity level (0-100)
+    dust_accumulation: float  # Dust on solar panels (mg/cm²)
+    atmospheric_dust_levels: int  # Atmospheric dust concentration (μg/m³)
 
 class CameraImage(BaseModel):
     url: str
