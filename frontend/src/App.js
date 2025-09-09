@@ -1242,6 +1242,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSol, setSelectedSol] = useState(null);
+  const [mapMode, setMapMode] = useState('canvas'); // 'canvas' or 'html'
   
   const fetchRoverData = useCallback(async (sol = null) => {
     try {
