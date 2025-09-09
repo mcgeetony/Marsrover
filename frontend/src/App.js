@@ -811,6 +811,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
   const startAutoPlay = useCallback(() => {
     if (autoPlayRef.current) return;
     
+    console.log('🎬 Starting auto-play...');
     setIsAutoPlay(true);
     
     // Get all mission events in chronological order (by SOL)
@@ -818,31 +819,46 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
       .filter(event => event.sol >= 0 && event.sol <= 1000)
       .sort((a, b) => a.sol - b.sol); // Ensure chronological order
     
-    let currentIndex = 0;
+    console.log('📅 Events to play:', allEvents.map(e => `SOL ${e.sol}: ${e.shortLabel}`));
     
-    // Start from the first event (SOL 0 - LANDING)
-    if (allEvents.length > 0) {
-      onSolChange(allEvents[0].sol);
-      currentIndex = 1; // Move to next event for the loop
-    }
+    let currentEventIndex = 0;
     
-    const playNext = () => {
-      if (currentIndex < allEvents.length) {
+    const playNextEvent = () => {
+      if (currentEventIndex < allEvents.length) {
+        const currentEvent = allEvents[currentEventIndex];
+        console.log(`🚀 Playing event ${currentEventIndex + 1}/${allEvents.length}: SOL ${currentEvent.sol} - ${currentEvent.shortLabel}`);
+        
+        // Update the SOL
+        onSolChange(currentEvent.sol);
+        
         // Move to next event
-        onSolChange(allEvents[currentIndex].sol);
-        currentIndex++;
-        // Speed-controlled timing (longer delay for better viewing)
-        autoPlayRef.current = setTimeout(playNext, 3000 / playbackSpeed);
+        currentEventIndex++;
+        
+        // Schedule next event with speed-controlled timing
+        const delay = 3000 / playbackSpeed;
+        autoPlayRef.current = setTimeout(playNextEvent, delay);
+        
       } else {
-        // Auto-play completed - stay at last event
+        // Auto-play completed
+        console.log('✅ Auto-play completed!');
         setIsAutoPlay(false);
         autoPlayRef.current = null;
       }
     };
     
-    // Start the progression after showing first event
-    autoPlayRef.current = setTimeout(playNext, 2000 / playbackSpeed);
-  }, [onSolChange, playbackSpeed]);
+    // Start immediately with first event
+    playNextEvent();
+    
+  }, [onSolChange, playbackSpeed, comprehensiveMissionEvents]);
+  
+  const stopAutoPlay = useCallback(() => {
+    console.log('⏸️ Stopping auto-play...');
+    if (autoPlayRef.current) {
+      clearTimeout(autoPlayRef.current);
+      autoPlayRef.current = null;
+    }
+    setIsAutoPlay(false);
+  }, []);
   
   const stopAutoPlay = useCallback(() => {
     if (autoPlayRef.current) {
