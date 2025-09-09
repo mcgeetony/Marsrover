@@ -128,7 +128,8 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoo
             className={`nasa-rover-position ${isCurrentPosition ? 'current' : ''}`}
             style={{
               left: `${pos.x}%`,
-              top: `${pos.y}%`
+              top: `${pos.y}%`,
+              transform: `scale(${zoomLevel})`
             }}
             title={`Rover Position - Sol ${point.sol}`}
           >
