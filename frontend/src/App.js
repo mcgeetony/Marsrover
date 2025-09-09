@@ -1166,9 +1166,23 @@ function App() {
   
   const handleSolChange = useCallback((newSol) => {
     if (newSol !== selectedSol) {
+      // Save current zoom level for the current SOL
+      if (selectedSol !== null) {
+        setMapZoomMemory(prev => ({
+          ...prev,
+          [selectedSol]: mapZoomLevel
+        }));
+      }
+      
+      // Restore zoom level for the new SOL
+      const savedZoom = mapZoomMemory[newSol];
+      if (savedZoom) {
+        setMapZoomLevel(savedZoom);
+      }
+      
       fetchRoverData(newSol);
     }
-  }, [selectedSol, fetchRoverData]);
+  }, [selectedSol, fetchRoverData, mapZoomLevel, mapZoomMemory]);
   
   const handleLocationClick = useCallback((location) => {
     console.log('Location clicked:', location);
@@ -1177,26 +1191,6 @@ function App() {
   const handleNotificationDismiss = useCallback((index) => {
     setNotifications(prev => prev.filter((_, i) => i !== index));
   }, []);
-  
-  // Map zoom memory functionality
-  const handleSolChange = useCallback((newSol) => {
-    // Save current zoom level for the current SOL
-    if (selectedSol !== null) {
-      setMapZoomMemory(prev => ({
-        ...prev,
-        [selectedSol]: mapZoomLevel
-      }));
-    }
-    
-    // Restore zoom level for the new SOL
-    const savedZoom = mapZoomMemory[newSol];
-    if (savedZoom) {
-      setMapZoomLevel(savedZoom);
-    }
-    
-    // Call the original sol change handler
-    onSolChange(newSol);
-  }, [selectedSol, mapZoomLevel, mapZoomMemory, onSolChange]);
   
   // Map zoom controls
   const handleZoomIn = useCallback(() => {
