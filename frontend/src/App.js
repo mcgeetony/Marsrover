@@ -1170,7 +1170,7 @@ function App() {
     return () => clearInterval(interval);
   }, [selectedSol, isLiveMode, fetchRoverData]);
   
-  const handleSolChange = useCallback((newSol) => {
+  const handleSolChange = useCallback((newSol, forceRefresh = false) => {
     if (newSol !== selectedSol) {
       // Save current zoom level for the current SOL
       if (selectedSol !== null) {
@@ -1186,7 +1186,7 @@ function App() {
         setMapZoomLevel(savedZoom);
       }
       
-      fetchRoverData(newSol);
+      fetchRoverData(newSol, forceRefresh);
     }
   }, [selectedSol, fetchRoverData, mapZoomLevel, mapZoomMemory]);
   
