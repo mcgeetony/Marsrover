@@ -696,6 +696,108 @@ body {
   font-style: italic;
 }
 
+/* Real-time Notifications System */
+.nasa-notifications {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 350px;
+}
+
+.nasa-notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #333333;
+  border-left: 4px solid #00ff88;
+  border-radius: 4px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+  animation: slideInRight 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.nasa-notification.discovery {
+  border-left-color: #8b5cf6;
+}
+
+.nasa-notification.sample {
+  border-left-color: #f59e0b;
+}
+
+.nasa-notification.data {
+  border-left-color: #0ea5e9;
+}
+
+.notification-icon {
+  font-size: 20px;
+  min-width: 24px;
+}
+
+.notification-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.notification-message {
+  font-size: 11px;
+  color: #cccccc;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  color: #888888;
+  font-weight: 500;
+}
+
+.notification-close {
+  background: transparent;
+  border: none;
+  color: #888888;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.notification-close:hover {
+  color: #ffffff;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* NASA Timeline Container - Fixed Bottom */
 .nasa-timeline-container {
   position: fixed;
