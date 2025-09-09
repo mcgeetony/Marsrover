@@ -75,35 +75,37 @@ A professional Mars rover mission control interface featuring real NASA data int
 
 ## 🚀 Quick Start
 
-### Local Development
+### ⚡ Super Simple Setup (One Command!)
+
 ```bash
-# Clone the repository
+# Clone and run
 git clone <your-repo-url>
 cd mars-rover-mission-control
-
-# Install dependencies
-cd frontend && yarn install
-cd ../backend && pip install -r requirements.txt
-
-# Set up environment variables
-# Add NASA_API_KEY to backend/.env
-echo "NASA_API_KEY=your-nasa-api-key" > backend/.env
-
-# Start development servers
-# Backend: uvicorn server:app --reload --port 8001
-# Frontend: yarn start
+npm run setup
 ```
 
-### Production Deployment (Vercel)
+**That's it!** 🎉 Opens automatically at http://localhost:3000
+
+### 📋 Prerequisites
+- **Node.js 16+** ([Download](https://nodejs.org))
+- **Python 3.8+** ([Download](https://python.org))
+
+### 🔧 Alternative Commands
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Using the startup script
+./start.sh
 
-# Deploy
-vercel --prod
+# Using npm scripts
+npm start          # Start both servers
+npm run frontend   # Frontend only
+npm run backend    # Backend only
+npm run build      # Production build
+```
 
-# Set environment variables in Vercel dashboard
-# NASA_API_KEY = your-nasa-api-key
+### 🌐 Production Deployment (Vercel)
+```bash
+npm run deploy
+# Set NASA_API_KEY in Vercel dashboard
 ```
 
 ## 📱 Mobile Responsiveness
