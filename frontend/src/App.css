@@ -1687,8 +1687,8 @@ body {
 
 .timeline-track-container {
   position: relative;
-  height: 80px;
-  margin-bottom: 16px;
+  height: 60px;
+  margin-bottom: 12px;
 }
 
 .nasa-timeline-track {
