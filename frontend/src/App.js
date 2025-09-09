@@ -590,6 +590,22 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         <div className="zoom-level">
           {Math.round(zoomLevel * 100)}%
         </div>
+        {/* 🔧 DEBUG CONTROLS */}
+        <button 
+          className={`debug-btn ${debugMode ? 'active' : ''}`} 
+          onClick={() => setDebugMode(!debugMode)}
+          title="Toggle Debug Mode"
+        >
+          🔧
+        </button>
+        {/* 🛰️ NASA TILES TOGGLE */}
+        <button 
+          className={`nasa-btn ${useNASATiles ? 'active' : ''}`} 
+          onClick={() => setUseNASATiles(!useNASATiles)}
+          title="Toggle NASA Mars Tiles"
+        >
+          🛰️
+        </button>
       </div>
       <canvas 
         ref={canvasRef} 
@@ -607,6 +623,17 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         onClick={handleClick}
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
+      {debugMode && (
+        <div className="debug-panel">
+          <h4>🔧 Debug Information</h4>
+          <div>Canvas: {canvasRef.current?.width}x{canvasRef.current?.height}</div>
+          <div>Zoom: {zoomLevel.toFixed(2)}x</div>
+          <div>Pan: ({panOffset.x.toFixed(1)}, {panOffset.y.toFixed(1)})</div>
+          <div>Route Points: {route?.length || 0}</div>
+          <div>Selected Sol: {selectedSol}</div>
+          <div>NASA Tiles: {useNASATiles ? 'ON' : 'OFF'}</div>
+        </div>
+      )}
     </div>
   );
 };
