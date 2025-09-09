@@ -73,13 +73,13 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoo
       {isLoading && <div className="map-loading">Updating Mars data...</div>}
       
       {/* High-resolution Mars satellite background */}
-      <div className="mars-satellite-background"></div>
+      <div className="mars-satellite-background" style={{ transform: `scale(${zoomLevel})` }}></div>
       
       {/* Exploration Zone Circle */}
-      <div className="exploration-zone"></div>
+      <div className="exploration-zone" style={{ transform: `scale(${zoomLevel})` }}></div>
       
       {/* Optimized Route Path using SVG */}
-      <svg className="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <svg className="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ transform: `scale(${zoomLevel})` }}>
         {visibleRoute.length > 1 && (
           <polyline
             points={visibleRoute.map(point => {
