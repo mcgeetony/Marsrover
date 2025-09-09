@@ -233,7 +233,7 @@ body {
 
 /* Left Panel - Telemetry */
 .nasa-left-panel {
-  width: 200px;
+  width: 220px;
   background: #000000;
   border-right: 1px solid #333333;
   display: flex;
