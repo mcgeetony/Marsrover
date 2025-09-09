@@ -852,7 +852,7 @@ function App() {
   const windData = React.useMemo(() => generateTelemetryData(32, 15), [generateTelemetryData]);
   const radiationData = React.useMemo(() => generateTelemetryData(203, 30), [generateTelemetryData]);
   const distanceData = React.useMemo(() => generateTelemetryData(2, 0.5), [generateTelemetryData]);
-  const dustData = React.useMemo(() => generateTelemetryData(203, 40), [generateTelemetryData]);
+  const dustData = React.useMemo(() => generateTelemetryData(150, 80), [generateTelemetryData]);
 
   useEffect(() => {
     fetchRoverData();
