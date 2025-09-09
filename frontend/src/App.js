@@ -1257,41 +1257,7 @@ function App() {
         onDismiss={handleNotificationDismiss} 
       />
       
-      {/* Layout Control Panel */}
-      <div className="layout-controls">
-        <div className="layout-control-group">
-          <button 
-            className={`layout-btn ${telemetryMode === 'vertical' ? 'active' : ''}`}
-            onClick={() => setTelemetryMode('vertical')}
-            title="Vertical Telemetry"
-          >
-            📊⬇
-          </button>
-          <button 
-            className={`layout-btn ${telemetryMode === 'horizontal' ? 'active' : ''}`}
-            onClick={() => setTelemetryMode('horizontal')}
-            title="Horizontal Telemetry"
-          >
-            📊➡
-          </button>
-        </div>
-        <div className="layout-control-group">
-          <button 
-            className={`layout-btn ${leftPanelCollapsed ? 'collapsed' : ''}`}
-            onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
-            title="Toggle Telemetry Panel"
-          >
-            ⬅
-          </button>
-          <button 
-            className={`layout-btn ${rightPanelCollapsed ? 'collapsed' : ''}`}
-            onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-            title="Toggle Camera Panel"
-          >
-            ➡
-          </button>
-        </div>
-      </div>
+
       
       {/* NASA Header with Real-time Status */}
       <header className="nasa-header">
