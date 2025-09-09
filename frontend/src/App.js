@@ -860,13 +860,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     setIsAutoPlay(false);
   }, []);
   
-  const stopAutoPlay = useCallback(() => {
-    if (autoPlayRef.current) {
-      clearTimeout(autoPlayRef.current);
-      autoPlayRef.current = null;
-    }
-    setIsAutoPlay(false);
-  }, []);
+
   
   // Timeline interaction handlers
   const handleInteraction = useCallback((e) => {
