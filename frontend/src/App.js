@@ -1429,6 +1429,8 @@ function App() {
                 subtitle="ATMOSPHERIC DUST LEVEL | OPACITY 0.8"
                 isLive={isLiveMode}
               />
+                )}
+              </>
             )}
           </div>
         </div>
