@@ -799,18 +799,18 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
   
   // Timeline interaction handlers
   const handleInteraction = useCallback((e) => {
-    if (!timelineRef.current || !sols.length) return;
+    if (!timelineRef.current) return;
     
     const rect = timelineRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, x / rect.width));
-    const index = Math.floor(percentage * sols.length);
-    const newSol = sols[Math.min(index, sols.length - 1)];
+    const maxSol = Math.max(selectedSol, 1000);
+    const newSol = Math.round(percentage * maxSol);
     
     if (newSol !== selectedSol) {
       onSolChange(newSol);
     }
-  }, [sols, selectedSol, onSolChange]);
+  }, [selectedSol, onSolChange]);
   
   const handleMouseMove = useCallback((e) => {
     if (isDragging) {
