@@ -1460,7 +1460,24 @@ function App() {
 
         {/* Right Panel - Camera Systems */}
         <div className={`nasa-right-panel ${rightPanelCollapsed ? 'collapsed' : ''}`}>
-          <NASACameraGallery cameras={roverData.cameras} />
+          {loading ? (
+            <div className="nasa-camera-section">
+              <div className="section-header">
+                <h3>CAMERA SYSTEMS</h3>
+                <div className="image-count">Loading...</div>
+              </div>
+              <div className="nasa-camera-grid-enhanced">
+                <ImageSkeleton />
+                <ImageSkeleton />
+                <ImageSkeleton />
+                <ImageSkeleton />
+                <ImageSkeleton />
+                <ImageSkeleton />
+              </div>
+            </div>
+          ) : (
+            <NASACameraGallery cameras={roverData.cameras} />
+          )}
         </div>
       </div>
 
