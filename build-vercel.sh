@@ -17,13 +17,15 @@ cp backend/requirements-vercel.txt backend/requirements.txt
 
 # Remove heavy unnecessary files and directories
 echo "🧹 Cleaning up heavy files..."
-rm -rf backend/venv/
-rm -rf backend/__pycache__/
-rm -rf backend/.pytest_cache/
-rm -f backend/*.log
-rm -f backend/server-vercel.py
+rm -rf backend/venv/ 2>/dev/null || true
+rm -rf backend/__pycache__/ 2>/dev/null || true
+rm -rf backend/.pytest_cache/ 2>/dev/null || true
+rm -rf backend/node_modules/ 2>/dev/null || true
+rm -f backend/*.log 2>/dev/null || true
+rm -f backend/server-vercel.py 2>/dev/null || true
 
 echo "After: $(du -sh backend/ | cut -f1)"
+echo "✅ Backend optimized for Vercel deployment!"
 
 # Build frontend
 echo "🔨 Building frontend..."
