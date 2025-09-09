@@ -227,16 +227,16 @@ frontend:
         comment: "Working on CSS updates to fully support advanced timeline features in App.js. Timeline modes, search/filter controls, analytics panel need complete CSS support."
 
   - task: "Dust Properties Integration"
-    implemented: false
+    implemented: true
     working: "NA"
-    file: "/app/frontend/src/App.js"
+    file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Need to integrate dust properties data into telemetry dashboard as mentioned in pending tasks."
+        comment: "Successfully implemented dust properties in backend API: dust_opacity, dust_storm_activity, dust_accumulation, atmospheric_dust_levels. Frontend already displays enhanced dust telemetry card with proper units (μg/m³)."
 
   - task: "Real-time Data Integration"
     implemented: false
