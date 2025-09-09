@@ -205,18 +205,15 @@ async def get_rover_data(sol: Optional[int] = None):
         # Fetch fresh data from NASA API
         nasa_data = await fetch_nasa_rover_data(sol)
         
+        # Always use the requested SOL, not the SOL from NASA API response
+        selected_sol = sol or 1000
+        
         if not nasa_data or "photos" not in nasa_data:
             errors.append("No data available from NASA API")
-            # Use fallback sol
-            selected_sol = sol or 1000
         else:
             photos = nasa_data["photos"]
             if not photos:
                 errors.append(f"No photos available for sol {sol}")
-                selected_sol = sol or 1000
-            else:
-                # Get sol from first photo
-                selected_sol = photos[0]["sol"]
         
         # Generate available sols (simulate available mission data)
         available_sols = list(range(max(0, selected_sol - 100), selected_sol + 1))
