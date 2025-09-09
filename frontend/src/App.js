@@ -882,12 +882,6 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
             >
               DETAILED
             </button>
-            <button 
-              className={`mode-btn ${timelineMode === 'analytics' ? 'active' : ''}`}
-              onClick={() => setTimelineMode('analytics')}
-            >
-              ANALYTICS
-            </button>
           </div>
           
           {/* Search and Filter */}
