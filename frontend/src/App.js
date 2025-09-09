@@ -782,6 +782,7 @@ function App() {
   const [selectedSol, setSelectedSol] = useState(null);
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isLiveMode, setIsLiveMode] = useState(true);
+  const [notifications, setNotifications] = useState([]);
   
   // Real-time data fetching with caching
   const fetchRoverData = useCallback(async (sol = null, forceRefresh = false) => {
