@@ -206,7 +206,7 @@ async def get_rover_data(sol: Optional[int] = None):
         nasa_data = await fetch_nasa_rover_data(sol)
         
         # Always use the requested SOL, not the SOL from NASA API response
-        selected_sol = sol or 1000
+        selected_sol = sol if sol is not None else 1000
         
         if not nasa_data or "photos" not in nasa_data:
             errors.append("No data available from NASA API")
