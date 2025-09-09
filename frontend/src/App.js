@@ -105,7 +105,8 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoo
             className="nasa-sample-pin"
             style={{
               left: `${pos.x}%`,
-              top: `${pos.y}%`
+              top: `${pos.y}%`,
+              transform: `scale(${zoomLevel})`
             }}
             title={`Sample ${Math.floor(point.sol / 60)} - Sol ${point.sol}`}
           >
