@@ -1718,7 +1718,7 @@ body {
 
 .nasa-timeline-event {
   position: absolute;
-  top: -28px;
+  top: -22px;
   transform: translateX(-50%);
   cursor: pointer;
   z-index: 10;
