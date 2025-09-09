@@ -828,8 +828,8 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
         const currentEvent = allEvents[currentEventIndex];
         console.log(`🚀 Playing event ${currentEventIndex + 1}/${allEvents.length}: SOL ${currentEvent.sol} - ${currentEvent.shortLabel}`);
         
-        // Update the SOL
-        onSolChange(currentEvent.sol);
+        // Update the SOL with force refresh to bypass cache
+        onSolChange(currentEvent.sol, true);
         
         // Move to next event
         currentEventIndex++;
