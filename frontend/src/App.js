@@ -1114,7 +1114,7 @@ function App() {
         }
       }
       
-      const endpoint = sol ? `/rover-data/${sol}` : '/rover-data';
+      const endpoint = sol !== null ? `/rover-data/${sol}` : '/rover-data';
       const response = await axios.get(`${API}${endpoint}`);
       
       // Cache the response
