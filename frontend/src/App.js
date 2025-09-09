@@ -304,7 +304,7 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         }
       });
       
-      // Add exploration zones with better visibility
+      // Add exploration zones with better visibility - using outlines only, no fills
       const explorationZones = [
         { x: width * 0.15, y: height * 0.25, name: "NERETVA VALLIS", type: "geological", radius: 50 },
         { x: width * 0.65, y: height * 0.45, name: "BELVA CRATER", type: "crater", radius: 60 },
@@ -312,7 +312,7 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
       ];
       
       explorationZones.forEach(zone => {
-        // Zone circle with enhanced visibility
+        // Zone circle with enhanced visibility - OUTLINE ONLY, NO FILL
         ctx.strokeStyle = '#78a9ff';
         ctx.lineWidth = 2;
         ctx.setLineDash([8, 4]);
@@ -321,12 +321,7 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         ctx.stroke();
         ctx.setLineDash([]);
         
-        // Zone background
-        ctx.fillStyle = 'rgba(120, 169, 255, 0.1)';
-        ctx.beginPath();
-        ctx.arc(zone.x, zone.y, zone.radius, 0, 2 * Math.PI);
-        ctx.fill();
-        
+        // NO ZONE BACKGROUND - Remove any blue fill areas
         // Zone label with background
         ctx.fillStyle = 'rgba(22, 22, 22, 0.8)';
         ctx.fillRect(zone.x - 60, zone.y - 60, 120, 20);
