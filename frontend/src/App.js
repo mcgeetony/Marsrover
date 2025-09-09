@@ -29,8 +29,8 @@ const DataCache = {
   }
 };
 
-// Professional NASA Mars Map with performance optimization
-const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
+// Enhanced NASA Mars Map with Real Route Data and Zoom
+const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick, zoomLevel = 1 }) => {
   const mapRef = useRef(null);
   const canvasRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
