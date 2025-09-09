@@ -586,7 +586,7 @@ body {
   z-index: 10;
 }
 
-.zoom-btn, .reset-btn {
+.zoom-btn, .reset-btn, .debug-btn, .nasa-btn {
   width: 36px;
   height: 36px;
   background: var(--carbon-gray-90);
@@ -602,10 +602,22 @@ body {
   justify-content: center;
 }
 
-.zoom-btn:hover, .reset-btn:hover {
+.zoom-btn:hover, .reset-btn:hover, .debug-btn:hover, .nasa-btn:hover {
   background: var(--carbon-gray-80);
   border-color: var(--carbon-blue-60);
   color: var(--carbon-blue-40);
+}
+
+.debug-btn.active {
+  background: var(--carbon-red-60);
+  border-color: var(--carbon-red-60);
+  color: var(--carbon-gray-10);
+}
+
+.nasa-btn.active {
+  background: var(--carbon-blue-60);
+  border-color: var(--carbon-blue-60);
+  color: var(--carbon-gray-10);
 }
 
 .zoom-level {
@@ -617,6 +629,33 @@ body {
   font-size: 0.75rem;
   text-align: center;
   min-width: 50px;
+}
+
+/* Debug Panel */
+.debug-panel {
+  position: absolute;
+  bottom: var(--spacing-05);
+  left: var(--spacing-05);
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--carbon-red-60);
+  padding: var(--spacing-04);
+  border-radius: 4px;
+  font-family: 'Chakra Petch', monospace;
+  font-size: 0.75rem;
+  color: var(--carbon-gray-10);
+  z-index: 10;
+  min-width: 200px;
+}
+
+.debug-panel h4 {
+  color: var(--carbon-red-50);
+  margin-bottom: var(--spacing-03);
+  font-size: 0.875rem;
+}
+
+.debug-panel div {
+  margin-bottom: var(--spacing-02);
+  color: var(--carbon-gray-30);
 }
 
 /* Right Panel - Camera Data */
