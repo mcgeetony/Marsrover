@@ -993,7 +993,7 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
           {/* Mission Events */}
           {filteredEvents.map((event, index) => {
             const eventSol = event.sol;
-            const maxSol = Math.max(selectedSol, sols[sols.length - 1] || 1000);
+            const maxSol = 1000; // Fixed max sol for consistent positioning
             const eventPercentage = (eventSol / maxSol) * 100;
             
             // Show all events on the timeline regardless of sols array
