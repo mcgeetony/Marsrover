@@ -10,7 +10,7 @@
       }
     },
     {
-      "src": "backend/server.py",
+      "src": "backend/server-vercel.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb"
