@@ -146,10 +146,39 @@ def generate_mock_telemetry(sol: int) -> Metrics:
     # Simulate radiation levels (relatively stable on Mars)
     radiation = round(0.24 + 0.03 * math.sin(sol * 0.1), 2)
     
+    # Simulate dust properties (realistic Mars atmospheric conditions)
+    # Dust opacity (tau) - typical range 0.3-3.0, higher during dust storms
+    base_opacity = 0.8
+    seasonal_dust = 0.4 * math.sin(sol * 0.01)  # Seasonal dust variations
+    storm_factor = 0.6 * abs(math.sin(sol * 0.02))  # Occasional dust storms
+    dust_opacity = round(max(0.3, base_opacity + seasonal_dust + storm_factor), 2)
+    
+    # Dust storm activity (0-100 scale)
+    base_activity = 15
+    seasonal_activity = 20 * math.sin(sol * 0.008)  # Seasonal storm patterns
+    random_activity = 10 * math.sin(sol * 0.05)  # Random variations
+    dust_storm_activity = max(0, min(100, int(base_activity + seasonal_activity + random_activity)))
+    
+    # Dust accumulation on solar panels (mg/cm²)
+    base_accumulation = 2.0
+    accumulation_growth = sol * 0.01  # Gradual accumulation over time
+    cleaning_cycles = -1.5 * math.floor(sol / 100)  # Cleaning every 100 sols
+    dust_accumulation = round(max(0.1, base_accumulation + accumulation_growth + cleaning_cycles), 2)
+    
+    # Atmospheric dust levels (μg/m³) - correlates with opacity
+    dust_base = 120
+    atmospheric_variation = 60 * (dust_opacity - 0.5)  # Based on opacity
+    seasonal_dust_atm = 30 * math.sin(sol * 0.012)
+    atmospheric_dust_levels = max(50, int(dust_base + atmospheric_variation + seasonal_dust_atm))
+    
     return Metrics(
         charge=charge,
         temperature=temperature,
-        radiation=radiation
+        radiation=radiation,
+        dust_opacity=dust_opacity,
+        dust_storm_activity=dust_storm_activity,
+        dust_accumulation=dust_accumulation,
+        atmospheric_dust_levels=atmospheric_dust_levels
     )
 
 @api_router.get("/")
