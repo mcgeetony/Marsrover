@@ -596,8 +596,8 @@ const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
     };
   }, []);
   
-  const selectedIndex = sols.indexOf(selectedSol);
-  const percentage = sols.length > 0 ? (selectedIndex / (sols.length - 1)) * 100 : 0;
+  const maxSol = Math.max(selectedSol, sols[sols.length - 1] || 1000);
+  const percentage = (selectedSol / maxSol) * 100;
   
   return (
     <div className="advanced-mission-timeline">
