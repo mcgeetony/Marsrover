@@ -5,11 +5,15 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Carbon-inspired Mars Map with realistic satellite imagery
+// Enhanced Carbon Mars Map with zoom and realistic terrain
 const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
   const canvasRef = useRef(null);
   const [animationProgress, setAnimationProgress] = useState(1);
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const animationRef = useRef(null);
   
   useEffect(() => {
@@ -20,51 +24,76 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     const width = canvas.width;
     const height = canvas.height;
     
-    // Clear canvas with realistic Mars terrain background
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Apply zoom and pan transformations
+    ctx.save();
+    ctx.translate(panOffset.x, panOffset.y);
+    ctx.scale(zoomLevel, zoomLevel);
+    
+    // Create realistic Mars terrain background
     const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
-    gradient.addColorStop(0, '#8B4513');  // Mars brown center
-    gradient.addColorStop(0.3, '#A0522D'); // Saddle brown
-    gradient.addColorStop(0.6, '#CD853F'); // Peru
+    gradient.addColorStop(0, '#CD853F');   // Peru/Sandy brown center
+    gradient.addColorStop(0.4, '#A0522D'); // Saddle brown
+    gradient.addColorStop(0.7, '#8B4513'); // Saddle brown darker
     gradient.addColorStop(1, '#654321');   // Dark brown edges
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
     
-    // Add realistic Mars surface details - Jezero Crater formations
-    ctx.globalAlpha = 0.6;
+    // Add realistic Mars surface details - rock formations and craters
+    ctx.globalAlpha = 0.3;
     
-    // Crater rim and geological features
-    const craterCenterX = width * 0.6;
-    const craterCenterY = height * 0.5;
-    const craterRadius = Math.min(width, height) * 0.3;
+    // Create multiple crater formations instead of one large blue circle
+    const craters = [
+      { x: width * 0.2, y: height * 0.3, radius: 60, depth: 0.6 },
+      { x: width * 0.7, y: height * 0.6, radius: 80, depth: 0.8 },
+      { x: width * 0.5, y: height * 0.8, radius: 45, depth: 0.5 },
+      { x: width * 0.8, y: height * 0.2, radius: 35, depth: 0.4 }
+    ];
     
-    // Draw crater rim
-    ctx.strokeStyle = '#5D4037';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(craterCenterX, craterCenterY, craterRadius, 0, 2 * Math.PI);
-    ctx.stroke();
+    craters.forEach(crater => {
+      const craterGradient = ctx.createRadialGradient(
+        crater.x, crater.y, 0,
+        crater.x, crater.y, crater.radius
+      );
+      craterGradient.addColorStop(0, `rgba(139, 69, 19, ${crater.depth})`);
+      craterGradient.addColorStop(0.6, `rgba(101, 67, 33, ${crater.depth * 0.8})`);
+      craterGradient.addColorStop(1, `rgba(160, 82, 45, ${crater.depth * 0.3})`);
+      
+      ctx.fillStyle = craterGradient;
+      ctx.beginPath();
+      ctx.arc(crater.x, crater.y, crater.radius, 0, 2 * Math.PI);
+      ctx.fill();
+    });
     
-    // Add delta formation (fan-shaped deposits)
-    ctx.fillStyle = '#8D6E63';
-    ctx.beginPath();
-    ctx.moveTo(craterCenterX - 50, craterCenterY + 20);
-    for (let i = 0; i < 5; i++) {
-      const angle = (i * Math.PI / 12) - Math.PI / 6;
-      const x = craterCenterX + Math.cos(angle) * 80;
-      const y = craterCenterY + Math.sin(angle) * 60;
-      ctx.lineTo(x, y);
-    }
-    ctx.fill();
+    // Add ancient riverbed/valley formations
+    const valleys = [
+      { startX: width * 0.1, startY: height * 0.4, endX: width * 0.6, endY: height * 0.5, width: 20 },
+      { startX: width * 0.6, startY: height * 0.3, endX: width * 0.9, endY: height * 0.7, width: 15 }
+    ];
+    
+    valleys.forEach(valley => {
+      ctx.strokeStyle = 'rgba(101, 67, 33, 0.6)';
+      ctx.lineWidth = valley.width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(valley.startX, valley.startY);
+      ctx.lineTo(valley.endX, valley.endY);
+      ctx.stroke();
+    });
     
     // Add rocky outcrops and surface texture
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 100; i++) {
       const x = Math.random() * width;
       const y = Math.random() * height;
-      const size = Math.random() * 8 + 2;
-      const alpha = Math.random() * 0.4 + 0.2;
+      const size = Math.random() * 6 + 1;
+      const alpha = Math.random() * 0.4 + 0.1;
       
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = Math.random() > 0.5 ? '#6D4C41' : '#5D4037';
+      ctx.fillStyle = Math.random() > 0.5 ? 
+        `rgba(${139 + Math.random() * 40}, ${69 + Math.random() * 30}, ${19 + Math.random() * 20}, 1)` :
+        `rgba(${160 + Math.random() * 30}, ${82 + Math.random() * 20}, ${45 + Math.random() * 15}, 1)`;
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.fill();
@@ -72,7 +101,10 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     
     ctx.globalAlpha = 1;
     
-    if (!route || route.length === 0) return;
+    if (!route || route.length === 0) {
+      ctx.restore();
+      return;
+    }
     
     // Calculate bounds for the route
     const lats = route.map(p => p.lat);
@@ -92,11 +124,11 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     const animatedRoute = filteredRoute.slice(0, animatedRouteLength);
     
     if (animatedRoute.length > 1) {
-      // Draw route path - Carbon Blue theme
+      // Draw route path with enhanced styling
       ctx.shadowColor = '#0f62fe';
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 6;
       ctx.strokeStyle = '#0f62fe';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -130,8 +162,14 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         const isCurrentPosition = index === animatedRoute.length - 1;
         
         if (isCurrentPosition) {
-          // Current position - pulsing rover indicator
+          // Current position - enhanced rover indicator
           const pulseSize = 12 + Math.sin(Date.now() * 0.008) * 3;
+          
+          // Rover shadow
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+          ctx.beginPath();
+          ctx.arc(x + 2, y + 2, pulseSize, 0, 2 * Math.PI);
+          ctx.fill();
           
           // Rover base
           ctx.fillStyle = '#0f62fe';
@@ -142,53 +180,71 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
           // Rover center
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.arc(x, y, 6, 0, 2 * Math.PI);
+          ctx.arc(x, y, 8, 0, 2 * Math.PI);
           ctx.fill();
           
           // Rover direction indicator
           ctx.strokeStyle = '#0f62fe';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.moveTo(x, y);
-          ctx.lineTo(x + 15, y - 10);
+          ctx.lineTo(x + 20, y - 15);
           ctx.stroke();
           
+          // Current position label
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 12px Chakra Petch, monospace';
+          ctx.strokeStyle = '#161616';
+          ctx.lineWidth = 3;
+          ctx.strokeText(`Sol ${point.sol} (Current)`, x + 25, y - 10);
+          ctx.fillText(`Sol ${point.sol} (Current)`, x + 25, y - 10);
+          
         } else if (isSamplePoint) {
-          // Sample collection points - Red pins like in the image
-          const pinHeight = 20;
-          const pinWidth = 12;
+          // Sample collection points - Enhanced red pins
+          const pinHeight = 25;
+          const pinWidth = 14;
           
           // Pin shadow
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
           ctx.beginPath();
-          ctx.arc(x + 2, y + pinHeight + 2, pinWidth/2, 0, 2 * Math.PI);
+          ctx.arc(x + 3, y + pinHeight + 3, pinWidth/2, 0, 2 * Math.PI);
           ctx.fill();
           
-          // Pin body
-          ctx.fillStyle = '#da1e28'; // Carbon Red
+          // Pin body gradient
+          const pinGradient = ctx.createRadialGradient(x, y, 0, x, y, pinWidth/2);
+          pinGradient.addColorStop(0, '#ff6b6b');
+          pinGradient.addColorStop(1, '#da1e28');
+          ctx.fillStyle = pinGradient;
           ctx.beginPath();
           ctx.arc(x, y, pinWidth/2, 0, 2 * Math.PI);
           ctx.fill();
+          
+          // Pin border
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x, y, pinWidth/2, 0, 2 * Math.PI);
+          ctx.stroke();
           
           // Pin point
           ctx.beginPath();
           ctx.moveTo(x, y + pinWidth/2);
           ctx.lineTo(x, y + pinHeight);
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 4;
           ctx.strokeStyle = '#da1e28';
           ctx.stroke();
           
           // Sample number
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 10px Chakra Petch, monospace';
+          ctx.font = 'bold 11px Chakra Petch, monospace';
           ctx.textAlign = 'center';
-          ctx.fillText(Math.floor(point.sol / 60), x, y + 3);
+          ctx.fillText(Math.floor(point.sol / 60), x, y + 4);
           ctx.textAlign = 'left';
           
         } else if (index % 20 === 0 || isHovered) {
-          // Important waypoints - smaller blue dots
-          const size = isHovered ? 8 : 4;
-          ctx.fillStyle = isHovered ? '#78a9ff' : '#0f62fe';
+          // Important waypoints
+          const size = isHovered ? 10 : 5;
+          ctx.fillStyle = isHovered ? '#78a9ff' : 'rgba(15, 98, 254, 0.8)';
           ctx.beginPath();
           ctx.arc(x, y, size, 0, 2 * Math.PI);
           ctx.fill();
@@ -197,13 +253,13 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(x, y, size + 3, 0, 2 * Math.PI);
+            ctx.arc(x, y, size + 4, 0, 2 * Math.PI);
             ctx.stroke();
           }
         }
         
         // Sol labels for important points
-        if ((index % 40 === 0 || isHovered) && !isCurrentPosition) {
+        if ((index % 40 === 0 || isHovered) && !isCurrentPosition && !isSamplePoint) {
           ctx.fillStyle = '#f4f4f4';
           ctx.font = isHovered ? 'bold 11px Chakra Petch, monospace' : '9px Chakra Petch, monospace';
           ctx.strokeStyle = '#161616';
@@ -213,39 +269,47 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
         }
       });
       
-      // Add exploration zones and geological features
+      // Add exploration zones with better visibility
       const explorationZones = [
-        { x: width * 0.2, y: height * 0.3, name: "NERETVA VALLIS", type: "geological" },
-        { x: width * 0.6, y: height * 0.4, name: "BELVA CRATER", type: "crater" },
-        { x: width * 0.8, y: height * 0.7, name: "DELTA FORMATION", type: "geological" }
+        { x: width * 0.15, y: height * 0.25, name: "NERETVA VALLIS", type: "geological", radius: 50 },
+        { x: width * 0.65, y: height * 0.45, name: "BELVA CRATER", type: "crater", radius: 60 },
+        { x: width * 0.8, y: height * 0.75, name: "DELTA FORMATION", type: "geological", radius: 45 }
       ];
       
       explorationZones.forEach(zone => {
-        // Zone circle
+        // Zone circle with enhanced visibility
         ctx.strokeStyle = '#78a9ff';
         ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
+        ctx.setLineDash([8, 4]);
         ctx.beginPath();
-        ctx.arc(zone.x, zone.y, 40, 0, 2 * Math.PI);
+        ctx.arc(zone.x, zone.y, zone.radius, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.setLineDash([]);
         
-        // Zone label
+        // Zone background
+        ctx.fillStyle = 'rgba(120, 169, 255, 0.1)';
+        ctx.beginPath();
+        ctx.arc(zone.x, zone.y, zone.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Zone label with background
+        ctx.fillStyle = 'rgba(22, 22, 22, 0.8)';
+        ctx.fillRect(zone.x - 60, zone.y - 60, 120, 20);
+        
         ctx.fillStyle = '#f4f4f4';
-        ctx.font = 'bold 12px Chakra Petch, monospace';
-        ctx.strokeStyle = '#161616';
-        ctx.lineWidth = 3;
-        ctx.strokeText(zone.name, zone.x - 40, zone.y - 50);
-        ctx.fillText(zone.name, zone.x - 40, zone.y - 50);
+        ctx.font = 'bold 11px Chakra Petch, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(zone.name, zone.x, zone.y - 45);
+        ctx.textAlign = 'left';
       });
     }
     
-    // Add coordinate grid overlay
-    ctx.strokeStyle = 'rgba(244, 244, 244, 0.1)';
+    // Add coordinate grid overlay (subtle)
+    ctx.strokeStyle = 'rgba(244, 244, 244, 0.05)';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 10; i++) {
-      const x = (i / 10) * width;
-      const y = (i / 10) * height;
+    for (let i = 0; i <= 20; i++) {
+      const x = (i / 20) * width;
+      const y = (i / 20) * height;
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
@@ -256,7 +320,9 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
       ctx.stroke();
     }
     
-  }, [route, currentPosition, selectedSol, animationProgress, hoveredPoint]);
+    ctx.restore();
+    
+  }, [route, currentPosition, selectedSol, animationProgress, hoveredPoint, zoomLevel, panOffset]);
   
   // Animation effect when sol changes
   useEffect(() => {
@@ -264,11 +330,11 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     const animate = () => {
       setAnimationProgress(prev => {
         if (prev >= 1) return 1;
-        return prev + 0.03;
+        return prev + 0.02;
       });
     };
     
-    animationRef.current = setInterval(animate, 40);
+    animationRef.current = setInterval(animate, 30);
     
     return () => {
       if (animationRef.current) {
@@ -277,79 +343,148 @@ const CarbonMarsMap = ({ route, currentPosition, selectedSol, onLocationClick })
     };
   }, [selectedSol]);
   
-  // Handle mouse interactions
-  const handleCanvasClick = (e) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    if (onLocationClick) {
+  // Handle zoom
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.min(Math.max(zoomLevel * delta, 0.5), 5);
+    setZoomLevel(newZoom);
+  };
+  
+  // Handle pan
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setLastMousePos({ x: e.clientX, y: e.clientY });
+  };
+  
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      const deltaX = e.clientX - lastMousePos.x;
+      const deltaY = e.clientY - lastMousePos.y;
+      setPanOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      setLastMousePos({ x: e.clientX, y: e.clientY });
+    } else {
+      // Handle hover detection (existing code)
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left - panOffset.x) / zoomLevel;
+      const mouseY = (e.clientY - rect.top - panOffset.y) / zoomLevel;
+      
+      if (route) {
+        const filteredRoute = route.filter(point => point.sol <= selectedSol);
+        const lats = route.map(p => p.lat);
+        const lons = route.map(p => p.lon);
+        const minLat = Math.min(...lats) - 0.003;
+        const maxLat = Math.max(...lats) + 0.003;
+        const minLon = Math.min(...lons) - 0.003;
+        const maxLon = Math.max(...lons) + 0.003;
+        
+        const latToY = (lat) => ((maxLat - lat) / (maxLat - minLat)) * canvas.height;
+        const lonToX = (lon) => ((lon - minLon) / (maxLon - minLon)) * canvas.width;
+        
+        let foundHover = null;
+        filteredRoute.forEach((point, index) => {
+          const x = lonToX(point.lon);
+          const y = latToY(point.lat);
+          const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+          
+          if (distance < 15) {
+            foundHover = index;
+          }
+        });
+        
+        setHoveredPoint(foundHover);
+      }
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
+  const handleClick = (e) => {
+    if (!isDragging && onLocationClick) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left - panOffset.x) / zoomLevel;
+      const y = (e.clientY - rect.top - panOffset.y) / zoomLevel;
       onLocationClick({ x, y });
     }
   };
   
-  const handleMouseMove = (e) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    if (route) {
-      const filteredRoute = route.filter(point => point.sol <= selectedSol);
-      const lats = route.map(p => p.lat);
-      const lons = route.map(p => p.lon);
-      const minLat = Math.min(...lats) - 0.003;
-      const maxLat = Math.max(...lats) + 0.003;
-      const minLon = Math.min(...lons) - 0.003;
-      const maxLon = Math.max(...lons) + 0.003;
-      
-      const latToY = (lat) => ((maxLat - lat) / (maxLat - minLat)) * canvas.height;
-      const lonToX = (lon) => ((lon - minLon) / (maxLon - minLon)) * canvas.width;
-      
-      let foundHover = null;
-      filteredRoute.forEach((point, index) => {
-        const x = lonToX(point.lon);
-        const y = latToY(point.lat);
-        const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
-        
-        if (distance < 15) {
-          foundHover = index;
-        }
-      });
-      
-      setHoveredPoint(foundHover);
-    }
+  // Reset zoom and pan
+  const resetView = () => {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
   };
   
   return (
     <div className="carbon-mars-map">
+      <div className="map-controls">
+        <button className="zoom-btn" onClick={() => setZoomLevel(prev => Math.min(prev * 1.2, 5))}>
+          +
+        </button>
+        <button className="zoom-btn" onClick={() => setZoomLevel(prev => Math.max(prev * 0.8, 0.5))}>
+          −
+        </button>
+        <button className="reset-btn" onClick={resetView}>
+          ⌂
+        </button>
+        <div className="zoom-level">
+          {Math.round(zoomLevel * 100)}%
+        </div>
+      </div>
       <canvas 
         ref={canvasRef} 
         width={1000} 
         height={600}
         className="mars-terrain-canvas"
-        onClick={handleCanvasClick}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
-        onMouseLeave={() => setHoveredPoint(null)}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => {
+          setHoveredPoint(null);
+          setIsDragging(false);
+        }}
+        onClick={handleClick}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
     </div>
   );
 };
 
-// Carbon FUI Timeline
-const CarbonTimeline = ({ sols, selectedSol, onSolChange }) => {
+// Enhanced Interactive Timeline with detailed sol selection
+const EnhancedTimeline = ({ sols, selectedSol, onSolChange }) => {
   const timelineRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [hoveredSol, setHoveredSol] = useState(null);
+  const [timelineWidth, setTimelineWidth] = useState(0);
   
   const missionEvents = [
-    { sol: 0, label: "Landing", type: "critical", icon: "⬇" },
-    { sol: 60, label: "First Sample", type: "success", icon: "⚗" },
-    { sol: 180, label: "Helicopter", type: "info", icon: "🚁" },
-    { sol: 300, label: "Delta Exploration", type: "info", icon: "🔍" },
-    { sol: 500, label: "Sample Cache", type: "success", icon: "📦" },
-    { sol: 800, label: "Canyon Survey", type: "info", icon: "🏔" }
+    { sol: 0, label: "Landing at Jezero", type: "critical", icon: "🛬", description: "Successful touchdown in Jezero Crater" },
+    { sol: 60, label: "First Rock Sample", type: "success", icon: "🪨", description: "Collected first Martian rock sample 'Montdenier'" },
+    { sol: 180, label: "Ingenuity Flight", type: "info", icon: "🚁", description: "First powered flight on another planet" },
+    { sol: 300, label: "Delta Exploration", type: "info", icon: "🏔️", description: "Investigating ancient river delta" },
+    { sol: 500, label: "Sample Depot", type: "success", icon: "📦", description: "Establishing sample cache for future retrieval" },
+    { sol: 750, label: "Crater Rim", type: "info", icon: "🔍", description: "Climbing up Jezero crater rim" },
+    { sol: 1000, label: "Ancient Lake", type: "discovery", icon: "💧", description: "Evidence of ancient lake discovered" }
   ];
+  
+  useEffect(() => {
+    const updateTimelineWidth = () => {
+      if (timelineRef.current) {
+        setTimelineWidth(timelineRef.current.offsetWidth);
+      }
+    };
+    
+    updateTimelineWidth();
+    window.addEventListener('resize', updateTimelineWidth);
+    return () => window.removeEventListener('resize', updateTimelineWidth);
+  }, []);
   
   const handleInteraction = useCallback((e) => {
     if (!timelineRef.current || !sols.length) return;
@@ -373,10 +508,23 @@ const CarbonTimeline = ({ sols, selectedSol, onSolChange }) => {
   const handleMouseMove = (e) => {
     if (isDragging) {
       handleInteraction(e);
+    } else if (timelineRef.current && sols.length) {
+      // Update hovered sol for preview
+      const rect = timelineRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(1, x / rect.width));
+      const index = Math.floor(percentage * sols.length);
+      const hoverSol = sols[Math.min(index, sols.length - 1)];
+      setHoveredSol(hoverSol);
     }
   };
   
   const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
+  const handleMouseLeave = () => {
+    setHoveredSol(null);
     setIsDragging(false);
   };
   
@@ -393,30 +541,116 @@ const CarbonTimeline = ({ sols, selectedSol, onSolChange }) => {
   
   const selectedIndex = sols.indexOf(selectedSol);
   const percentage = sols.length > 0 ? (selectedIndex / (sols.length - 1)) * 100 : 0;
+  const hoveredIndex = hoveredSol ? sols.indexOf(hoveredSol) : -1;
+  const hoveredPercentage = hoveredIndex >= 0 ? (hoveredIndex / (sols.length - 1)) * 100 : -1;
+  
+  // Generate sol markers for major intervals
+  const generateSolMarkers = () => {
+    const markers = [];
+    const interval = Math.max(50, Math.floor((sols[sols.length - 1] - sols[0]) / 10));
+    
+    for (let i = sols[0]; i <= sols[sols.length - 1]; i += interval) {
+      const closestSol = sols.find(s => s >= i) || sols[sols.length - 1];
+      const markerIndex = sols.indexOf(closestSol);
+      const markerPercentage = (markerIndex / (sols.length - 1)) * 100;
+      
+      markers.push({
+        sol: closestSol,
+        percentage: markerPercentage,
+        isSelected: closestSol === selectedSol
+      });
+    }
+    
+    return markers;
+  };
+  
+  const solMarkers = generateSolMarkers();
   
   return (
-    <div className="carbon-timeline">
+    <div className="enhanced-timeline">
       <div className="timeline-header">
         <div className="timeline-info">
-          <span className="timeline-label">Mission Timeline</span>
-          <span className="timeline-range">Sol {sols[0] || 0} - Sol {sols[sols.length - 1] || 0}</span>
+          <h3 className="timeline-title">Mission Timeline</h3>
+          <div className="timeline-stats">
+            <span className="stat-item">
+              <span className="stat-label">Total Sols:</span>
+              <span className="stat-value">{sols[sols.length - 1] - sols[0] + 1}</span>
+            </span>
+            <span className="stat-item">
+              <span className="stat-label">Range:</span>
+              <span className="stat-value">Sol {sols[0]} - Sol {sols[sols.length - 1]}</span>
+            </span>
+          </div>
         </div>
-        <div className="selected-sol-display">
-          <span className="sol-label">Current Sol</span>
-          <span className="sol-value">{selectedSol}</span>
+        
+        <div className="selected-sol-info">
+          <div className="sol-display">
+            <div className="sol-label">Current Sol</div>
+            <div className="sol-value">{selectedSol}</div>
+          </div>
+          {hoveredSol && hoveredSol !== selectedSol && (
+            <div className="hovered-sol-preview">
+              <div className="preview-label">Preview Sol</div>
+              <div className="preview-value">{hoveredSol}</div>
+            </div>
+          )}
         </div>
       </div>
       
-      <div className="timeline-track-container">
+      {/* Mission Events Overview */}
+      <div className="mission-events-overview">
+        <h4 className="events-title">Key Mission Events</h4>
+        <div className="events-list">
+          {missionEvents.map((event, index) => (
+            <button
+              key={index}
+              className={`event-chip ${event.type} ${selectedSol >= event.sol ? 'completed' : 'upcoming'}`}
+              onClick={() => onSolChange(event.sol)}
+              title={event.description}
+            >
+              <span className="event-icon">{event.icon}</span>
+              <span className="event-label">{event.label}</span>
+              <span className="event-sol">Sol {event.sol}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Interactive Timeline Track */}
+      <div className="timeline-track-section">
+        <div className="sol-markers">
+          {solMarkers.map((marker, index) => (
+            <div
+              key={index}
+              className={`sol-marker ${marker.isSelected ? 'selected' : ''}`}
+              style={{ left: `${marker.percentage}%` }}
+              onClick={() => onSolChange(marker.sol)}
+            >
+              <div className="marker-line"></div>
+              <div className="marker-label">Sol {marker.sol}</div>
+            </div>
+          ))}
+        </div>
+        
         <div 
           ref={timelineRef}
-          className="carbon-timeline-track"
+          className="enhanced-timeline-track"
           onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           <div className="timeline-background" />
           <div className="timeline-progress" style={{ width: `${percentage}%` }} />
           
-          {/* Mission Events */}
+          {/* Hover preview indicator */}
+          {hoveredPercentage >= 0 && hoveredPercentage !== percentage && (
+            <div 
+              className="hover-indicator" 
+              style={{ left: `${hoveredPercentage}%` }}
+            />
+          )}
+          
+          {/* Mission Events on Timeline */}
           {missionEvents.map((event, index) => {
             const eventSol = event.sol;
             const eventIndex = sols.indexOf(eventSol) || sols.findIndex(s => s >= eventSol);
@@ -426,17 +660,19 @@ const CarbonTimeline = ({ sols, selectedSol, onSolChange }) => {
               return (
                 <div 
                   key={index}
-                  className={`timeline-event ${event.type}`}
+                  className={`timeline-event ${event.type} ${selectedSol >= eventSol ? 'completed' : 'upcoming'}`}
                   style={{ left: `${eventPercentage}%` }}
                   onClick={() => onSolChange(eventSol)}
-                  title={`Sol ${eventSol}: ${event.label}`}
                 >
-                  <div className="event-marker">
+                  <div className="timeline-event-marker">
                     <span className="event-icon">{event.icon}</span>
                   </div>
-                  <div className="event-tooltip">
-                    <div className="tooltip-title">{event.label}</div>
-                    <div className="tooltip-sol">Sol {eventSol}</div>
+                  <div className="timeline-event-tooltip">
+                    <div className="tooltip-header">
+                      <span className="tooltip-title">{event.label}</span>
+                      <span className="tooltip-sol">Sol {eventSol}</span>
+                    </div>
+                    <div className="tooltip-description">{event.description}</div>
                   </div>
                 </div>
               );
@@ -444,17 +680,69 @@ const CarbonTimeline = ({ sols, selectedSol, onSolChange }) => {
             return null;
           })}
           
+          {/* Timeline Thumb */}
           <div 
-            className="timeline-thumb" 
+            className="enhanced-timeline-thumb" 
             style={{ left: `${percentage}%` }}
-          />
+          >
+            <div className="thumb-indicator">
+              <div className="thumb-center"></div>
+            </div>
+            <div className="thumb-label">Sol {selectedSol}</div>
+          </div>
+        </div>
+        
+        {/* Timeline Navigation */}
+        <div className="timeline-navigation">
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.max(sols[0], selectedSol - 50))}
+            disabled={selectedSol <= sols[0]}
+          >
+            ⏪ -50 Sols
+          </button>
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.max(sols[0], selectedSol - 10))}
+            disabled={selectedSol <= sols[0]}
+          >
+            ⏮ -10 Sols
+          </button>
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.max(sols[0], selectedSol - 1))}
+            disabled={selectedSol <= sols[0]}
+          >
+            ⏭ -1 Sol
+          </button>
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 1))}
+            disabled={selectedSol >= sols[sols.length - 1]}
+          >
+            ⏭ +1 Sol
+          </button>
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 10))}
+            disabled={selectedSol >= sols[sols.length - 1]}
+          >
+            ⏭ +10 Sols
+          </button>
+          <button 
+            className="nav-btn"
+            onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 50))}
+            disabled={selectedSol >= sols[sols.length - 1]}
+          >
+            ⏩ +50 Sols
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// Carbon Telemetry Cards
+// Carbon Telemetry Cards (keeping existing implementation)
 const CarbonTelemetryCard = ({ title, value, unit, trend, data, color, icon }) => {
   const canvasRef = useRef(null);
   
@@ -530,7 +818,7 @@ const CarbonTelemetryCard = ({ title, value, unit, trend, data, color, icon }) =
   );
 };
 
-// Enhanced Camera Gallery with Carbon styling
+// Enhanced Camera Gallery (keeping existing implementation)
 const CarbonCameraGallery = ({ cameras }) => {
   const [selectedCamera, setSelectedCamera] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -647,7 +935,7 @@ const CarbonCameraGallery = ({ cameras }) => {
   );
 };
 
-// Main App with Carbon FUI Design
+// Main App with enhanced features
 function App() {
   const [roverData, setRoverData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -891,9 +1179,9 @@ function App() {
         </div>
       </div>
 
-      {/* Bottom Timeline */}
+      {/* Enhanced Bottom Timeline */}
       <div className="timeline-container">
-        <CarbonTimeline 
+        <EnhancedTimeline 
           sols={roverData.timeline.sols}
           selectedSol={selectedSol}
           onSolChange={handleSolChange}

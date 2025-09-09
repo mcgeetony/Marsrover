@@ -519,7 +519,7 @@ body {
   font-weight: 400;
 }
 
-/* Center Panel - Mars Map */
+/* Center Panel - Enhanced Mars Map */
 .center-panel {
   flex: 1;
   display: flex;
@@ -571,8 +571,52 @@ body {
 .mars-terrain-canvas {
   max-width: 100%;
   max-height: 100%;
-  cursor: crosshair;
   border: 1px solid var(--carbon-gray-80);
+  transition: cursor 0.2s ease;
+}
+
+/* Map Controls */
+.map-controls {
+  position: absolute;
+  top: var(--spacing-05);
+  right: var(--spacing-05);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-02);
+  z-index: 10;
+}
+
+.zoom-btn, .reset-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--carbon-gray-90);
+  border: 1px solid var(--carbon-gray-70);
+  color: var(--carbon-gray-10);
+  font-family: 'Chakra Petch', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:hover, .reset-btn:hover {
+  background: var(--carbon-gray-80);
+  border-color: var(--carbon-blue-60);
+  color: var(--carbon-blue-40);
+}
+
+.zoom-level {
+  background: var(--carbon-gray-90);
+  border: 1px solid var(--carbon-gray-70);
+  color: var(--carbon-gray-30);
+  padding: var(--spacing-02) var(--spacing-03);
+  font-family: 'Chakra Petch', monospace;
+  font-size: 0.75rem;
+  text-align: center;
+  min-width: 50px;
 }
 
 /* Right Panel - Camera Data */
@@ -887,47 +931,73 @@ body {
   line-height: 1.4;
 }
 
-/* Timeline Container */
+/* Enhanced Timeline Container */
 .timeline-container {
   background: linear-gradient(135deg, var(--carbon-gray-100), #0a0a0a);
   border-top: 1px solid var(--carbon-gray-80);
-  padding: var(--spacing-05) var(--spacing-07);
+  padding: var(--spacing-06) var(--spacing-07);
 }
 
-/* Carbon Timeline */
-.carbon-timeline {
-  max-width: 1200px;
+/* Enhanced Timeline */
+.enhanced-timeline {
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .timeline-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-05);
+  align-items: flex-start;
+  margin-bottom: var(--spacing-06);
 }
 
 .timeline-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-02);
+  gap: var(--spacing-03);
 }
 
-.timeline-label {
-  font-size: 0.875rem;
+.timeline-title {
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--carbon-gray-10);
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin: 0;
 }
 
-.timeline-range {
+.timeline-stats {
+  display: flex;
+  gap: var(--spacing-06);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-01);
+}
+
+.stat-label {
   font-size: 0.75rem;
   color: var(--carbon-gray-50);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--carbon-blue-40);
   font-family: 'Chakra Petch', monospace;
 }
 
-.selected-sol-display {
+.selected-sol-info {
+  display: flex;
+  gap: var(--spacing-06);
+  align-items: flex-end;
+}
+
+.sol-display {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -942,38 +1012,191 @@ body {
 }
 
 .sol-value {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--carbon-blue-40);
   font-family: 'Chakra Petch', monospace;
+  line-height: 1;
 }
 
-.timeline-track-container {
-  position: relative;
-  height: 60px;
+.hovered-sol-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-02);
+  opacity: 0.7;
 }
 
-.carbon-timeline-track {
-  position: relative;
-  height: 8px;
+.preview-label {
+  font-size: 0.625rem;
+  color: var(--carbon-gray-60);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--carbon-gray-40);
+  font-family: 'Chakra Petch', monospace;
+  line-height: 1;
+}
+
+/* Mission Events Overview */
+.mission-events-overview {
+  margin-bottom: var(--spacing-06);
+}
+
+.events-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--carbon-gray-10);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--spacing-04);
+}
+
+.events-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-03);
+}
+
+.event-chip {
+  background: transparent;
+  border: 1px solid var(--carbon-gray-70);
+  color: var(--carbon-gray-40);
+  padding: var(--spacing-03) var(--spacing-04);
+  font-family: 'Chakra Petch', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  margin-top: 26px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.event-chip:hover {
+  border-color: var(--carbon-blue-60);
+  color: var(--carbon-blue-40);
+  transform: translateY(-1px);
+}
+
+.event-chip.completed {
+  border-color: var(--carbon-green-50);
+  color: var(--carbon-green-50);
+  background: rgba(66, 190, 101, 0.1);
+}
+
+.event-chip.upcoming {
+  border-color: var(--carbon-gray-60);
+  color: var(--carbon-gray-60);
+}
+
+.event-chip.critical.completed {
+  border-color: var(--carbon-orange-50);
+  color: var(--carbon-orange-50);
+  background: rgba(255, 131, 43, 0.1);
+}
+
+.event-chip.success.completed {
+  border-color: var(--carbon-green-50);
+  color: var(--carbon-green-50);
+  background: rgba(66, 190, 101, 0.1);
+}
+
+.event-chip.discovery.completed {
+  border-color: var(--carbon-blue-40);
+  color: var(--carbon-blue-40);
+  background: rgba(120, 169, 255, 0.1);
+}
+
+.event-icon {
+  font-size: 0.875rem;
+}
+
+.event-label {
+  flex: 1;
+}
+
+.event-sol {
+  font-size: 0.625rem;
+  opacity: 0.8;
+}
+
+/* Timeline Track Section */
+.timeline-track-section {
+  position: relative;
+}
+
+.sol-markers {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  height: 30px;
+  margin-bottom: var(--spacing-04);
+}
+
+.sol-marker {
+  position: absolute;
+  transform: translateX(-50%);
+  cursor: pointer;
+  z-index: 5;
+}
+
+.marker-line {
+  width: 2px;
+  height: 20px;
+  background: var(--carbon-gray-60);
+  margin: 0 auto 4px;
+  transition: all 0.15s ease;
+}
+
+.sol-marker:hover .marker-line,
+.sol-marker.selected .marker-line {
+  background: var(--carbon-blue-60);
+  height: 24px;
+}
+
+.marker-label {
+  font-size: 0.625rem;
+  color: var(--carbon-gray-50);
+  font-family: 'Chakra Petch', monospace;
+  text-align: center;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.sol-marker:hover .marker-label,
+.sol-marker.selected .marker-label {
+  color: var(--carbon-blue-40);
+  font-weight: 600;
+}
+
+.enhanced-timeline-track {
+  position: relative;
+  height: 12px;
+  cursor: pointer;
+  margin-bottom: var(--spacing-06);
 }
 
 .timeline-background {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: var(--carbon-gray-80);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--carbon-gray-80), var(--carbon-gray-70), var(--carbon-gray-80));
+  border-radius: 6px;
 }
 
 .timeline-progress {
   position: absolute;
   height: 100%;
   background: linear-gradient(90deg, var(--carbon-blue-60), var(--carbon-blue-40));
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  border-radius: 6px;
+  transition: width 0.4s ease;
   overflow: hidden;
 }
 
@@ -993,18 +1216,30 @@ body {
   100% { left: 100%; }
 }
 
-/* Timeline Events */
+.hover-indicator {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 16px;
+  background: var(--carbon-gray-30);
+  border-radius: 1px;
+  transform: translate(-50%, -50%);
+  opacity: 0.8;
+  z-index: 8;
+}
+
+/* Timeline Events on Track */
 .timeline-event {
   position: absolute;
-  top: -8px;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 10;
 }
 
-.event-marker {
-  width: 16px;
-  height: 16px;
+.timeline-event-marker {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 2px solid var(--carbon-gray-10);
   display: flex;
@@ -1014,53 +1249,69 @@ body {
   position: relative;
 }
 
-.timeline-event.critical .event-marker {
-  background: var(--carbon-red-60);
+.timeline-event.critical .timeline-event-marker {
+  background: var(--carbon-orange-50);
 }
 
-.timeline-event.success .event-marker {
+.timeline-event.success .timeline-event-marker {
   background: var(--carbon-green-50);
 }
 
-.timeline-event.info .event-marker {
+.timeline-event.info .timeline-event-marker {
   background: var(--carbon-blue-60);
 }
 
-.timeline-event:hover .event-marker {
+.timeline-event.discovery .timeline-event-marker {
+  background: var(--carbon-blue-40);
+}
+
+.timeline-event.upcoming .timeline-event-marker {
+  background: var(--carbon-gray-60);
+  opacity: 0.6;
+}
+
+.timeline-event:hover .timeline-event-marker {
   transform: scale(1.2);
   box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.2);
 }
 
-.event-icon {
-  font-size: 8px;
+.timeline-event-marker .event-icon {
+  font-size: 9px;
   color: var(--carbon-gray-10);
 }
 
-.event-tooltip {
+.timeline-event-tooltip {
   position: absolute;
-  bottom: 30px;
+  bottom: 35px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--carbon-gray-90);
   border: 1px solid var(--carbon-gray-70);
-  padding: var(--spacing-03) var(--spacing-04);
-  border-radius: 2px;
+  padding: var(--spacing-04);
+  border-radius: 4px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
   z-index: 20;
+  min-width: 200px;
 }
 
-.timeline-event:hover .event-tooltip {
+.timeline-event:hover .timeline-event-tooltip {
   opacity: 1;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-02);
 }
 
 .tooltip-title {
   font-size: 0.75rem;
   color: var(--carbon-gray-10);
-  font-weight: 500;
-  margin-bottom: var(--spacing-01);
+  font-weight: 600;
 }
 
 .tooltip-sol {
@@ -1069,29 +1320,101 @@ body {
   font-family: 'Chakra Petch', monospace;
 }
 
-/* Timeline Thumb */
-.timeline-thumb {
+.tooltip-description {
+  font-size: 0.625rem;
+  color: var(--carbon-gray-30);
+  line-height: 1.4;
+}
+
+/* Enhanced Timeline Thumb */
+.enhanced-timeline-thumb {
   position: absolute;
   top: 50%;
-  width: 20px;
-  height: 20px;
-  background: var(--carbon-blue-60);
-  border: 3px solid var(--carbon-gray-10);
-  border-radius: 50%;
   transform: translate(-50%, -50%);
   cursor: grab;
-  transition: all 0.15s ease;
   z-index: 15;
 }
 
-.timeline-thumb:hover {
-  transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.2);
+.thumb-indicator {
+  width: 24px;
+  height: 24px;
+  background: var(--carbon-blue-60);
+  border: 3px solid var(--carbon-gray-10);
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-.timeline-thumb:active {
+.enhanced-timeline-thumb:hover .thumb-indicator {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.3);
+}
+
+.enhanced-timeline-thumb:active {
   cursor: grabbing;
-  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.enhanced-timeline-thumb:active .thumb-indicator {
+  transform: scale(1.2);
+}
+
+.thumb-center {
+  width: 8px;
+  height: 8px;
+  background: var(--carbon-gray-10);
+  border-radius: 50%;
+}
+
+.thumb-label {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--carbon-gray-90);
+  border: 1px solid var(--carbon-gray-70);
+  padding: var(--spacing-02) var(--spacing-03);
+  font-size: 0.75rem;
+  color: var(--carbon-gray-10);
+  font-family: 'Chakra Petch', monospace;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+
+/* Timeline Navigation */
+.timeline-navigation {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-03);
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--carbon-gray-70);
+  color: var(--carbon-gray-40);
+  padding: var(--spacing-03) var(--spacing-04);
+  font-family: 'Chakra Petch', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  border-color: var(--carbon-blue-60);
+  color: var(--carbon-blue-40);
+  transform: translateY(-1px);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 /* Animations */
@@ -1110,6 +1433,12 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .enhanced-timeline {
+    max-width: 1200px;
+  }
+}
+
 @media (max-width: 1200px) {
   .left-panel {
     width: 280px;
@@ -1117,6 +1446,14 @@ body {
   
   .right-panel {
     width: 320px;
+  }
+  
+  .timeline-stats {
+    gap: var(--spacing-04);
+  }
+  
+  .selected-sol-info {
+    gap: var(--spacing-04);
   }
 }
 
@@ -1132,11 +1469,11 @@ body {
     border-right: none;
     border-top: 1px solid var(--carbon-gray-80);
     border-bottom: 1px solid var(--carbon-gray-80);
+    max-height: 300px;
   }
   
   .left-panel {
     order: 2;
-    max-height: 300px;
   }
   
   .center-panel {
@@ -1146,7 +1483,6 @@ body {
   
   .right-panel {
     order: 3;
-    max-height: 400px;
   }
   
   .stats-grid {
@@ -1155,6 +1491,21 @@ body {
   
   .camera-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .timeline-header {
+    flex-direction: column;
+    gap: var(--spacing-04);
+    align-items: flex-start;
+  }
+  
+  .timeline-stats {
+    flex-direction: column;
+    gap: var(--spacing-02);
+  }
+  
+  .events-list {
+    gap: var(--spacing-02);
   }
 }
 
@@ -1180,6 +1531,23 @@ body {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .timeline-navigation {
+    gap: var(--spacing-02);
+  }
+  
+  .nav-btn {
+    padding: var(--spacing-02) var(--spacing-03);
+    font-size: 0.625rem;
+  }
+  
+  .sol-value {
+    font-size: 1.5rem;
+  }
+  
+  .events-list {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1197,14 +1565,30 @@ body {
     grid-template-columns: 1fr;
   }
   
-  .timeline-thumb {
-    width: 16px;
-    height: 16px;
+  .enhanced-timeline-thumb .thumb-indicator {
+    width: 20px;
+    height: 20px;
   }
   
-  .event-marker {
-    width: 12px;
-    height: 12px;
+  .timeline-event-marker {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .timeline-navigation {
+    flex-direction: column;
+    gap: var(--spacing-02);
+  }
+  
+  .map-controls {
+    top: var(--spacing-03);
+    right: var(--spacing-03);
+  }
+  
+  .zoom-btn, .reset-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
   }
 }
 
