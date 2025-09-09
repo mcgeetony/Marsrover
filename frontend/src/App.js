@@ -5,13 +5,39 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Professional NASA Mars Map with real satellite imagery
+// Real-time data cache and update system
+const DataCache = {
+  cache: new Map(),
+  lastUpdate: null,
+  UPDATE_INTERVAL: 300000, // 5 minutes
+  
+  get(key) {
+    return this.cache.get(key);
+  },
+  
+  set(key, data) {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  },
+  
+  isStale(key) {
+    const cached = this.cache.get(key);
+    if (!cached) return true;
+    return Date.now() - cached.timestamp > this.UPDATE_INTERVAL;
+  }
+};
+
+// Professional NASA Mars Map with performance optimization
 const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) => {
   const mapRef = useRef(null);
+  const canvasRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Calculate route bounds
-  const getRouteBounds = () => {
+  // Memoized coordinate calculations for performance
+  const routeBounds = React.useMemo(() => {
     if (!route || route.length === 0) return null;
     
     const lats = route.map(p => p.lat);
@@ -22,34 +48,42 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) =
       minLon: Math.min(...lons) - 0.002,
       maxLon: Math.max(...lons) + 0.002
     };
-  };
+  }, [route]);
   
-  // Convert lat/lon to percentage position
-  const coordToPercent = (lat, lon) => {
-    const bounds = getRouteBounds();
-    if (!bounds) return { x: 50, y: 50 };
+  // Optimized coordinate conversion
+  const coordToPercent = useCallback((lat, lon) => {
+    if (!routeBounds) return { x: 50, y: 50 };
     
-    const x = ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * 100;
-    const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 100;
+    const x = ((lon - routeBounds.minLon) / (routeBounds.maxLon - routeBounds.minLon)) * 100;
+    const y = ((routeBounds.maxLat - lat) / (routeBounds.maxLat - routeBounds.minLat)) * 100;
     
-    return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
-  };
+    return { 
+      x: Math.max(0, Math.min(100, x)), 
+      y: Math.max(0, Math.min(100, y)) 
+    };
+  }, [routeBounds]);
   
-  const filteredRoute = route ? route.filter(point => point.sol <= selectedSol) : [];
+  // Virtualized route rendering for performance
+  const visibleRoute = React.useMemo(() => {
+    if (!route) return [];
+    return route.filter(point => point.sol <= selectedSol);
+  }, [route, selectedSol]);
   
   return (
     <div className="nasa-mars-map" ref={mapRef}>
-      {/* Real Mars satellite imagery background */}
+      {isLoading && <div className="map-loading">Updating Mars data...</div>}
+      
+      {/* High-resolution Mars satellite background */}
       <div className="mars-satellite-background"></div>
       
       {/* Exploration Zone Circle */}
       <div className="exploration-zone"></div>
       
-      {/* Route Path using SVG */}
+      {/* Optimized Route Path using SVG */}
       <svg className="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {filteredRoute.length > 1 && (
+        {visibleRoute.length > 1 && (
           <polyline
-            points={filteredRoute.map(point => {
+            points={visibleRoute.map(point => {
               const pos = coordToPercent(point.lat, point.lon);
               return `${pos.x},${pos.y}`;
             }).join(' ')}
@@ -63,15 +97,12 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) =
         )}
       </svg>
       
-      {/* Sample Collection Points */}
-      {filteredRoute.map((point, index) => {
-        if (point.sol % 60 !== 0) return null; // Only sample points
-        
+      {/* Sample Collection Points - Virtualized */}
+      {visibleRoute.filter((point, index) => point.sol % 60 === 0).map((point, index) => {
         const pos = coordToPercent(point.lat, point.lon);
-        
         return (
           <div
-            key={`sample-${index}`}
+            key={`sample-${point.sol}`}
             className="nasa-sample-pin"
             style={{
               left: `${pos.x}%`,
@@ -86,14 +117,14 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) =
         );
       })}
       
-      {/* Rover Positions */}
-      {filteredRoute.filter((_, index) => index % 50 === 0).map((point, index) => {
+      {/* Rover Positions - Optimized rendering */}
+      {visibleRoute.filter((_, index) => index % 50 === 0).map((point, index) => {
         const pos = coordToPercent(point.lat, point.lon);
-        const isCurrentPosition = point.sol === selectedSol;
+        const isCurrentPosition = point.sol >= selectedSol - 5 && point.sol <= selectedSol;
         
         return (
           <div
-            key={`rover-${index}`}
+            key={`rover-${point.sol}`}
             className={`nasa-rover-position ${isCurrentPosition ? 'current' : ''}`}
             style={{
               left: `${pos.x}%`,
@@ -120,9 +151,10 @@ const NASAMarsMap = ({ route, currentPosition, selectedSol, onLocationClick }) =
   );
 };
 
-// Enhanced Telemetry Card with Graphs
-const NASATelemetryCard = ({ title, value, unit, data, color, type, subtitle }) => {
+// Enhanced Telemetry Card with Real-time Updates
+const NASATelemetryCard = ({ title, value, unit, data, color, type, subtitle, isLive = false }) => {
   const chartRef = useRef(null);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
   
   useEffect(() => {
     if (!chartRef.current || !data) return;
@@ -132,65 +164,78 @@ const NASATelemetryCard = ({ title, value, unit, data, color, type, subtitle }) 
     const width = canvas.width;
     const height = canvas.height;
     
-    ctx.clearRect(0, 0, width, height);
+    // Performance: Use requestAnimationFrame for smooth rendering
+    requestAnimationFrame(() => {
+      ctx.clearRect(0, 0, width, height);
+      
+      if (type === 'line') {
+        // Optimized line chart rendering
+        const min = Math.min(...data);
+        const max = Math.max(...data);
+        const range = max - min || 1;
+        
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        data.forEach((value, index) => {
+          const x = (index / (data.length - 1)) * width;
+          const y = height - ((value - min) / range) * height;
+          
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        
+        ctx.stroke();
+        
+        // Fill area with gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, `${color}40`);
+        gradient.addColorStop(1, `${color}10`);
+        
+        ctx.fillStyle = gradient;
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fill();
+        
+      } else if (type === 'bar') {
+        // Optimized bar chart rendering
+        const max = Math.max(...data);
+        const barWidth = width / data.length;
+        
+        data.forEach((value, index) => {
+          const barHeight = (value / max) * height;
+          const x = index * barWidth;
+          const y = height - barHeight;
+          
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, barWidth - 1, barHeight);
+        });
+      }
+    });
     
-    if (type === 'line') {
-      // Line chart
-      const min = Math.min(...data);
-      const max = Math.max(...data);
-      const range = max - min || 1;
-      
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      
-      data.forEach((value, index) => {
-        const x = (index / (data.length - 1)) * width;
-        const y = height - ((value - min) / range) * height;
-        
-        if (index === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      });
-      
-      ctx.stroke();
-      
-      // Fill area
-      ctx.globalAlpha = 0.2;
-      ctx.fillStyle = color;
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      
-    } else if (type === 'bar') {
-      // Bar chart
-      const max = Math.max(...data);
-      const barWidth = width / data.length;
-      
-      data.forEach((value, index) => {
-        const barHeight = (value / max) * height;
-        const x = index * barWidth;
-        const y = height - barHeight;
-        
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, barWidth - 1, barHeight);
-      });
+    if (isLive) {
+      setLastUpdate(Date.now());
     }
-    
-  }, [data, color, type, value]);
+  }, [data, color, type, value, isLive]);
   
   return (
     <div className="nasa-telemetry-card">
       <div className="card-header">
-        <div className="card-icon">●</div>
+        <div className={`card-icon ${isLive ? 'live' : ''}`}>●</div>
         <div className="card-info">
           <div className="card-title">{title}</div>
           {subtitle && <div className="card-subtitle">{subtitle}</div>}
         </div>
+        {isLive && (
+          <div className="live-timestamp">
+            {new Date(lastUpdate).toLocaleTimeString()}
+          </div>
+        )}
       </div>
       <div className="card-main-value">
         <span className="main-number">{value}</span>
@@ -217,9 +262,15 @@ const NASATelemetryCard = ({ title, value, unit, data, color, type, subtitle }) 
   );
 };
 
-// NASA Style Camera Gallery
+// NASA Style Camera Gallery with lazy loading
 const NASACameraGallery = ({ cameras }) => {
   const [selectedCamera, setSelectedCamera] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  
+  // Lazy load images for performance
+  const handleImageLoad = useCallback((imageIndex) => {
+    setLoadedImages(prev => new Set([...prev, imageIndex]));
+  }, []);
   
   if (!cameras || cameras.length === 0) {
     return (
@@ -260,10 +311,15 @@ const NASACameraGallery = ({ cameras }) => {
             <img 
               src={image.url} 
               alt={`${cameras[selectedCamera].name} ${index + 1}`}
+              loading="lazy"
+              onLoad={() => handleImageLoad(index)}
               onError={(e) => {
                 e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5PIElNQUdFPC90ZXh0Pjwvc3ZnPg==';
               }}
             />
+            {!loadedImages.has(index) && (
+              <div className="image-loader">Loading...</div>
+            )}
           </div>
         ))}
       </div>
@@ -271,20 +327,202 @@ const NASACameraGallery = ({ cameras }) => {
   );
 };
 
-// NASA Timeline Component
-const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
+// ADVANCED MISSION TIMELINE - The centerpiece
+const AdvancedMissionTimeline = ({ sols, selectedSol, onSolChange }) => {
   const timelineRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [timelineMode, setTimelineMode] = useState('events'); // 'events', 'detailed', 'analytics'
+  const [isAutoPlay, setIsAutoPlay] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const autoPlayRef = useRef(null);
   
-  const missionEvents = [
-    { sol: 0, label: "LANDING AT JEZERO", shortLabel: "LANDING", type: "critical" },
-    { sol: 60, label: "FIRST ROCK SAMPLE", shortLabel: "FIRST SAMPLE", type: "success" },
-    { sol: 180, label: "INGENUITY FLIGHT", shortLabel: "HELICOPTER", type: "flight" },
-    { sol: 300, label: "DELTA EXPLORATION", shortLabel: "DELTA EXPL", type: "exploration" },
-    { sol: 500, label: "SAMPLE DEPOT", shortLabel: "SAMPLE DEPOT", type: "success" },
-    { sol: 1000, label: "ANCIENT LAKE", shortLabel: "ANCIENT LAKE", type: "discovery" }
+  // Comprehensive mission events with categories and details
+  const comprehensiveMissionEvents = [
+    {
+      sol: 0, 
+      label: "LANDING AT JEZERO", 
+      shortLabel: "LANDING", 
+      type: "critical",
+      category: "landing",
+      description: "Successful touchdown in Jezero Crater using sky crane maneuver",
+      significance: "Mission start",
+      instruments: ["Cameras", "MOXIE"],
+      coordinates: { lat: 18.4447, lon: 77.4508 }
+    },
+    {
+      sol: 18,
+      label: "FIRST DRIVE",
+      shortLabel: "FIRST DRIVE", 
+      type: "milestone",
+      category: "mobility",
+      description: "Perseverance's first drive on Mars - 6.5 meters forward",
+      significance: "Mobility systems operational",
+      instruments: ["Navigation Cameras", "Hazcams"],
+      coordinates: { lat: 18.4448, lon: 77.4509 }
+    },
+    {
+      sol: 43,
+      label: "INGENUITY DEPLOYED",
+      shortLabel: "HELI DEPLOYED",
+      type: "milestone", 
+      category: "helicopter",
+      description: "Mars Helicopter Ingenuity successfully deployed from rover belly",
+      significance: "First Mars helicopter preparation",
+      instruments: ["Ingenuity"],
+      coordinates: { lat: 18.4446, lon: 77.4505 }
+    },
+    {
+      sol: 60,
+      label: "FIRST ROCK SAMPLE",
+      shortLabel: "FIRST SAMPLE",
+      type: "success",
+      category: "sampling",
+      description: "Successfully collected first rock sample 'Montdenier'",
+      significance: "Primary mission objective achieved",
+      instruments: ["Sampling and Caching System", "SUPERCAM"],
+      coordinates: { lat: 18.4455, lon: 77.4520 }
+    },
+    {
+      sol: 62,
+      label: "INGENUITY FIRST FLIGHT",
+      shortLabel: "FIRST FLIGHT",
+      type: "historic",
+      category: "helicopter", 
+      description: "First powered flight on another planet - 39.1 seconds",
+      significance: "Historic aviation achievement",
+      instruments: ["Ingenuity Helicopter"],
+      coordinates: { lat: 18.4446, lon: 77.4505 }
+    },
+    {
+      sol: 120,
+      label: "OCTAVIA E. BUTLER SITE",
+      shortLabel: "BUTLER SITE",
+      type: "exploration",
+      category: "exploration",
+      description: "Reached Octavia E. Butler landing site for detailed exploration",
+      significance: "Geological survey location",
+      instruments: ["RIMFAX", "SUPERCAM", "MASTCAM-Z"],
+      coordinates: { lat: 18.4455, lon: 77.4515 }
+    },
+    {
+      sol: 180,
+      label: "MULTIPLE HELICOPTER FLIGHTS", 
+      shortLabel: "MULTI FLIGHTS",
+      type: "success",
+      category: "helicopter",
+      description: "Series of successful helicopter flights scouting ahead",
+      significance: "Extended helicopter operations",
+      instruments: ["Ingenuity"],
+      coordinates: { lat: 18.4460, lon: 77.4525 }
+    },
+    {
+      sol: 234,
+      label: "SAMPLE CACHE CREATED",
+      shortLabel: "CACHE START",
+      type: "success", 
+      category: "sampling",
+      description: "Started creating sample cache for future Mars Sample Return",
+      significance: "Future mission preparation",
+      instruments: ["Sampling System"],
+      coordinates: { lat: 18.4465, lon: 77.4530 }
+    },
+    {
+      sol: 300,
+      label: "DELTA EXPLORATION",
+      shortLabel: "DELTA EXPL",
+      type: "exploration",
+      category: "exploration", 
+      description: "Began exploration of ancient river delta formation",
+      significance: "Search for signs of ancient life",
+      instruments: ["SUPERCAM", "PIXL", "SHERLOC"],
+      coordinates: { lat: 18.4480, lon: 77.4550 }
+    },
+    {
+      sol: 500,
+      label: "SAMPLE DEPOT COMPLETE",
+      shortLabel: "DEPOT DONE",
+      type: "success",
+      category: "sampling",
+      description: "Completed sample depot with 10 tubes for future retrieval",
+      significance: "Mars Sample Return preparation complete",
+      instruments: ["Sampling System"],
+      coordinates: { lat: 18.4500, lon: 77.4580 }
+    },
+    {
+      sol: 750,
+      label: "CRATER RIM ASCENT",
+      shortLabel: "RIM CLIMB",
+      type: "milestone",
+      category: "mobility",
+      description: "Successfully climbed up Jezero crater rim",
+      significance: "New geological terrain access",
+      instruments: ["All systems"],
+      coordinates: { lat: 18.4520, lon: 77.4600 }
+    },
+    {
+      sol: 1000,
+      label: "ANCIENT LAKE EVIDENCE",
+      shortLabel: "ANCIENT LAKE", 
+      type: "discovery",
+      category: "discovery",
+      description: "Discovered compelling evidence of ancient lake in Jezero Crater",
+      significance: "Major scientific discovery",
+      instruments: ["SUPERCAM", "MASTCAM-Z", "RIMFAX"],
+      coordinates: { lat: 18.4540, lon: 77.4620 }
+    }
   ];
   
+  // Filter events based on search and filter type
+  const filteredEvents = React.useMemo(() => {
+    let events = comprehensiveMissionEvents;
+    
+    if (filterType !== 'all') {
+      events = events.filter(event => event.category === filterType);
+    }
+    
+    if (searchQuery) {
+      events = events.filter(event => 
+        event.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    return events;
+  }, [searchQuery, filterType]);
+  
+  // Auto-play functionality
+  const startAutoPlay = useCallback(() => {
+    if (autoPlayRef.current) return;
+    
+    setIsAutoPlay(true);
+    const events = filteredEvents.filter(event => event.sol >= selectedSol);
+    let currentIndex = 0;
+    
+    const playNext = () => {
+      if (currentIndex < events.length) {
+        onSolChange(events[currentIndex].sol);
+        currentIndex++;
+        autoPlayRef.current = setTimeout(playNext, 3000 / playbackSpeed);
+      } else {
+        setIsAutoPlay(false);
+        autoPlayRef.current = null;
+      }
+    };
+    
+    playNext();
+  }, [filteredEvents, selectedSol, onSolChange, playbackSpeed]);
+  
+  const stopAutoPlay = useCallback(() => {
+    if (autoPlayRef.current) {
+      clearTimeout(autoPlayRef.current);
+      autoPlayRef.current = null;
+    }
+    setIsAutoPlay(false);
+  }, []);
+  
+  // Timeline interaction handlers
   const handleInteraction = useCallback((e) => {
     if (!timelineRef.current || !sols.length) return;
     
@@ -302,6 +540,7 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
   const handleMouseDown = (e) => {
     setIsDragging(true);
     handleInteraction(e);
+    stopAutoPlay(); // Stop auto-play when user interacts
   };
   
   const handleMouseMove = (e) => {
@@ -325,22 +564,107 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
     }
   }, [isDragging, handleMouseMove]);
   
+  // Cleanup auto-play on unmount
+  useEffect(() => {
+    return () => {
+      if (autoPlayRef.current) {
+        clearTimeout(autoPlayRef.current);
+      }
+    };
+  }, []);
+  
   const selectedIndex = sols.indexOf(selectedSol);
   const percentage = sols.length > 0 ? (selectedIndex / (sols.length - 1)) * 100 : 0;
   
   return (
-    <div className="nasa-timeline">
-      <div className="timeline-header">
-        <div className="timeline-title">
-          <h3>MISSION TIMELINE</h3>
-          <div className="timeline-subtitle">OPERATIONAL TIMELINE FLOW & EVENTS</div>
+    <div className="advanced-mission-timeline">
+      {/* Timeline Controls */}
+      <div className="timeline-controls">
+        <div className="timeline-header">
+          <div className="timeline-title">
+            <h3>MISSION TIMELINE</h3>
+            <div className="timeline-subtitle">OPERATIONAL TIMELINE FLOW & EVENTS</div>
+          </div>
+          <div className="current-sol-display">
+            <div className="sol-label">CURRENT SOL</div>
+            <div className="sol-number">{selectedSol}</div>
+          </div>
         </div>
-        <div className="current-sol-display">
-          <div className="sol-label">CURRENT SOL</div>
-          <div className="sol-number">{selectedSol}</div>
+        
+        {/* Advanced Controls */}
+        <div className="timeline-advanced-controls">
+          {/* Mode Selection */}
+          <div className="mode-selector">
+            <button 
+              className={`mode-btn ${timelineMode === 'events' ? 'active' : ''}`}
+              onClick={() => setTimelineMode('events')}
+            >
+              EVENTS
+            </button>
+            <button 
+              className={`mode-btn ${timelineMode === 'detailed' ? 'active' : ''}`}
+              onClick={() => setTimelineMode('detailed')}
+            >
+              DETAILED
+            </button>
+            <button 
+              className={`mode-btn ${timelineMode === 'analytics' ? 'active' : ''}`}
+              onClick={() => setTimelineMode('analytics')}
+            >
+              ANALYTICS
+            </button>
+          </div>
+          
+          {/* Search and Filter */}
+          <div className="search-filter-controls">
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="timeline-search"
+            />
+            <select 
+              value={filterType} 
+              onChange={(e) => setFilterType(e.target.value)}
+              className="timeline-filter"
+            >
+              <option value="all">All Events</option>
+              <option value="landing">Landing</option>
+              <option value="sampling">Sampling</option>
+              <option value="helicopter">Helicopter</option>
+              <option value="exploration">Exploration</option>
+              <option value="discovery">Discoveries</option>
+              <option value="mobility">Mobility</option>
+            </select>
+          </div>
+          
+          {/* Auto-play Controls */}
+          <div className="autoplay-controls">
+            {!isAutoPlay ? (
+              <button className="autoplay-btn" onClick={startAutoPlay}>
+                ▶ AUTO PLAY
+              </button>
+            ) : (
+              <button className="autoplay-btn active" onClick={stopAutoPlay}>
+                ⏸ PAUSE
+              </button>
+            )}
+            <select 
+              value={playbackSpeed} 
+              onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+              className="speed-selector"
+            >
+              <option value={0.5}>0.5x</option>
+              <option value={1}>1x</option>
+              <option value={2}>2x</option>
+              <option value={4}>4x</option>
+            </select>
+          </div>
         </div>
       </div>
       
+      {/* Timeline Track */}
       <div className="timeline-track-container">
         <div 
           ref={timelineRef}
@@ -351,7 +675,7 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
           <div className="timeline-progress" style={{ width: `${percentage}%` }} />
           
           {/* Mission Events */}
-          {missionEvents.map((event, index) => {
+          {filteredEvents.map((event, index) => {
             const eventSol = event.sol;
             const eventIndex = sols.indexOf(eventSol) || sols.findIndex(s => s >= eventSol);
             const eventPercentage = eventIndex >= 0 ? (eventIndex / (sols.length - 1)) * 100 : -10;
@@ -360,7 +684,7 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
               return (
                 <div 
                   key={index}
-                  className={`nasa-timeline-event ${event.type} ${selectedSol >= eventSol ? 'completed' : 'upcoming'}`}
+                  className={`nasa-timeline-event ${event.type} ${selectedSol >= eventSol ? 'completed' : 'upcoming'} ${timelineMode}`}
                   style={{ left: `${eventPercentage}%` }}
                   onClick={() => onSolChange(eventSol)}
                 >
@@ -370,6 +694,14 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
                   <div className="event-label">
                     <div className="event-title">{event.shortLabel}</div>
                     <div className="event-sol">SOL {eventSol}</div>
+                    {timelineMode === 'detailed' && (
+                      <div className="event-details">
+                        <div className="event-description">{event.description}</div>
+                        <div className="event-instruments">
+                          {event.instruments.join(', ')}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -384,7 +716,11 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
         </div>
       </div>
       
+      {/* Enhanced Navigation */}
       <div className="timeline-navigation">
+        <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 100))} disabled={selectedSol <= sols[0]}>
+          ⏪ -100 SOLS
+        </button>
         <button onClick={() => onSolChange(Math.max(sols[0], selectedSol - 50))} disabled={selectedSol <= sols[0]}>
           ⏪ -50 SOLS
         </button>
@@ -395,7 +731,7 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
           ⏮ -1 SOLS
         </button>
         <button className="home-btn" onClick={() => onSolChange(1000)}>
-          ⌂
+          ⌂ SOL 1000
         </button>
         <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 1))} disabled={selectedSol >= sols[sols.length - 1]}>
           ⏭ +1 SOLS
@@ -406,26 +742,75 @@ const NASATimeline = ({ sols, selectedSol, onSolChange }) => {
         <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 50))} disabled={selectedSol >= sols[sols.length - 1]}>
           +50 SOLS ⏩
         </button>
+        <button onClick={() => onSolChange(Math.min(sols[sols.length - 1], selectedSol + 100))} disabled={selectedSol >= sols[sols.length - 1]}>
+          +100 SOLS ⏩
+        </button>
       </div>
+      
+      {/* Timeline Analytics Panel */}
+      {timelineMode === 'analytics' && (
+        <div className="timeline-analytics">
+          <div className="analytics-summary">
+            <div className="summary-stat">
+              <span className="stat-number">{filteredEvents.length}</span>
+              <span className="stat-label">Mission Events</span>
+            </div>
+            <div className="summary-stat">
+              <span className="stat-number">{filteredEvents.filter(e => e.sol <= selectedSol).length}</span>
+              <span className="stat-label">Completed</span>
+            </div>
+            <div className="summary-stat">
+              <span className="stat-number">{filteredEvents.filter(e => e.category === 'sampling').length}</span>
+              <span className="stat-label">Samples</span>
+            </div>
+            <div className="summary-stat">
+              <span className="stat-number">{filteredEvents.filter(e => e.category === 'discovery').length}</span>
+              <span className="stat-label">Discoveries</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Main App
+// Main App with Real-time Updates
 function App() {
   const [roverData, setRoverData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSol, setSelectedSol] = useState(null);
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  const [isLiveMode, setIsLiveMode] = useState(true);
   
-  const fetchRoverData = useCallback(async (sol = null) => {
+  // Real-time data fetching with caching
+  const fetchRoverData = useCallback(async (sol = null, forceRefresh = false) => {
     try {
       setLoading(true);
+      const cacheKey = `rover-data-${sol || 'latest'}`;
+      
+      // Check cache first (unless force refresh)
+      if (!forceRefresh && !DataCache.isStale(cacheKey)) {
+        const cached = DataCache.get(cacheKey);
+        if (cached) {
+          setRoverData(cached.data);
+          setSelectedSol(cached.data.header.sol);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const endpoint = sol ? `/rover-data/${sol}` : '/rover-data';
       const response = await axios.get(`${API}${endpoint}`);
+      
+      // Cache the response
+      DataCache.set(cacheKey, response.data);
+      
       setRoverData(response.data);
       setSelectedSol(response.data.header.sol);
       setError(null);
+      setLastUpdateTime(new Date());
     } catch (err) {
       console.error('Error fetching rover data:', err);
       setError('Communication link lost');
@@ -433,6 +818,17 @@ function App() {
       setLoading(false);
     }
   }, []);
+  
+  // Auto-refresh for live mode
+  useEffect(() => {
+    if (!isLiveMode) return;
+    
+    const interval = setInterval(() => {
+      fetchRoverData(selectedSol, true); // Force refresh for live data
+    }, DataCache.UPDATE_INTERVAL);
+    
+    return () => clearInterval(interval);
+  }, [selectedSol, isLiveMode, fetchRoverData]);
   
   const handleSolChange = useCallback((newSol) => {
     if (newSol !== selectedSol) {
@@ -455,7 +851,7 @@ function App() {
           <div className="nasa-loading-spinner"></div>
           <div className="loading-text">
             <div className="primary-text">NASA MARS MISSION CONTROL</div>
-            <div className="secondary-text">Establishing connection to Perseverance rover...</div>
+            <div className="secondary-text">Establishing real-time connection to Perseverance rover...</div>
           </div>
         </div>
       </div>
@@ -481,23 +877,23 @@ function App() {
   
   if (!roverData) return null;
   
-  // Generate telemetry data
-  const generateTelemetryData = (baseValue, variation, sols = 50) => {
+  // Generate optimized telemetry data
+  const generateTelemetryData = useCallback((baseValue, variation, sols = 50) => {
     return Array.from({length: sols}, (_, i) => {
       const sol = Math.max(0, selectedSol - sols + i + 1);
       return Math.max(0, baseValue + variation * Math.sin(sol * 0.1) + (Math.random() - 0.5) * variation * 0.2);
     });
-  };
+  }, [selectedSol]);
   
-  const tempData = generateTelemetryData(203, 20); // Kelvin
-  const windData = generateTelemetryData(32, 15); // KMH
-  const radiationData = generateTelemetryData(203, 30); // Counts
-  const distanceData = generateTelemetryData(2, 0.5); // m/sec
-  const dustData = generateTelemetryData(203, 40); // Particle count
+  const tempData = React.useMemo(() => generateTelemetryData(203, 20), [generateTelemetryData]);
+  const windData = React.useMemo(() => generateTelemetryData(32, 15), [generateTelemetryData]);
+  const radiationData = React.useMemo(() => generateTelemetryData(203, 30), [generateTelemetryData]);
+  const distanceData = React.useMemo(() => generateTelemetryData(2, 0.5), [generateTelemetryData]);
+  const dustData = React.useMemo(() => generateTelemetryData(203, 40), [generateTelemetryData]);
   
   return (
     <div className="nasa-app">
-      {/* NASA Header */}
+      {/* NASA Header with Real-time Status */}
       <header className="nasa-header">
         <div className="header-left">
           <div className="nasa-logo">NASA</div>
@@ -508,6 +904,19 @@ function App() {
         </div>
         
         <div className="header-right">
+          <div className="live-status">
+            <button 
+              className={`live-toggle ${isLiveMode ? 'active' : ''}`}
+              onClick={() => setIsLiveMode(!isLiveMode)}
+            >
+              {isLiveMode ? '🔴 LIVE' : '⚪ OFFLINE'}
+            </button>
+            {lastUpdateTime && (
+              <div className="last-update">
+                Updated: {lastUpdateTime.toLocaleTimeString()}
+              </div>
+            )}
+          </div>
           <div className="status-group">
             <div className="status-item">
               <div className="status-label">EARTH TIME</div>
@@ -533,7 +942,9 @@ function App() {
         <div className="nasa-left-panel">
           <div className="panel-header">
             <h3>TELEMETRY DATA</h3>
-            <div className="live-indicator">LIVE</div>
+            <div className={`live-indicator ${isLiveMode ? 'live' : 'offline'}`}>
+              {isLiveMode ? 'LIVE' : 'OFFLINE'}
+            </div>
           </div>
           
           <div className="telemetry-stack">
@@ -545,6 +956,7 @@ function App() {
               color="#00ff88"
               type="line"
               subtitle="AVERAGE 200K | RANGE 180K-220K"
+              isLive={isLiveMode}
             />
             
             <NASATelemetryCard
@@ -555,6 +967,7 @@ function App() {
               color="#0ea5e9"
               type="bar"
               subtitle="MAX 45 KMH | DIR NE"
+              isLive={isLiveMode}
             />
             
             <NASATelemetryCard
@@ -565,6 +978,7 @@ function App() {
               color="#f59e0b"
               type="bar"
               subtitle="LEVEL NORMAL | SAFE RANGE"
+              isLive={isLiveMode}
             />
             
             <NASATelemetryCard
@@ -575,16 +989,18 @@ function App() {
               color="#10b981"
               type="line"
               subtitle="72 KM/H AVG | 1 HR 12 MIN"
+              isLive={isLiveMode}
             />
             
             <NASATelemetryCard
               title="Dust Properties"
-              value="203"
+              value="203"  
               unit="K"
               data={dustData}
               color="#8b5cf6"
               type="bar"
               subtitle="PARTICLE COUNT | VISIBILITY GOOD"
+              isLive={isLiveMode}
             />
           </div>
         </div>
@@ -614,9 +1030,9 @@ function App() {
         </div>
       </div>
 
-      {/* Fixed Bottom Timeline */}
+      {/* ADVANCED MISSION TIMELINE - Fixed Bottom */}
       <div className="nasa-timeline-container">
-        <NASATimeline 
+        <AdvancedMissionTimeline 
           sols={roverData.timeline.sols}
           selectedSol={selectedSol}
           onSolChange={handleSolChange}
